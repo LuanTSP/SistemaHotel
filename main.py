@@ -30,7 +30,7 @@ class App(ctk.CTk):
         #     idade = random.randint(10, 90)
         #     cursor.execute(f"INSERT INTO clientes VALUES ('{nome}', '{sobrenome}', {cpf}, {idade})")
         # con.commit()
-        search = SearchInDataBase(master=self, by='cpf', con=con, table_name='clientes', display_table_cols=['nome', 'sobrenome', 'idade', 'cpf'])
+        search = SearchInDataBase(master=self, by='nome', con=con, table_name='clientes', display_table_cols=['nome', 'sobrenome', 'idade', 'cpf'])
         search.grid(row=0, column=1, sticky='nswe')
 
         # run
@@ -96,7 +96,6 @@ class SearchInDataBase(ctk.CTkFrame):
             tables_str += table + ','
         tables_str = tables_str[:-1]
         return f"SELECT {tables_str} FROM {self.table_name}"
-
 
 
 
