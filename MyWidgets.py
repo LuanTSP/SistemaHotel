@@ -137,7 +137,18 @@ class Database:
             return pd.read_sql(sql_string, con=self.con)
         if return_as == 'dict':
             return pd.read_sql(sql_string, con=self.con).to_dict()
-        
+    
+    def delete(self, table_name: str, condition: str):
+        cursor = self.con.cursor()
+        delete_str = f"DELETE FROM {table_name} WHERE {condition}"
+        cursor.execute(delete_str)
+        self.con.commit()
+    
+    def update(self, table_name: str, values, condition):
+        update_str = f"UPDATE {table_name} SET {values} WHERE {condition}"
+        cursor = self.con.cursor()
+        cursor.execute(update_str)
+        self.con.commit()
 
 
 

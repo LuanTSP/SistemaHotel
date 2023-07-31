@@ -21,7 +21,8 @@ class App(ctk.CTk):
         search.grid(row=0, column=1, sticky='nswe')
 
         database = Database(con=con)
-        print(database.read("SELECT nome, idade FROM clientes WHERE nome = 'Ferdinando'", return_as='dict'))
+        database.update(table_name='clientes', values='idade=21', condition='idade=77')
+        print(database.read("SELECT nome, idade FROM clientes WHERE nome = 'Ferdinando'"))
 
         # run
         self.mainloop()
