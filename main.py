@@ -17,8 +17,9 @@ class App(ctk.CTk):
         self.columnconfigure(index=1, weight=2, uniform='a')
         
 
-        # widgets    
-        search = SearchInDataBase(master=self)
+        # widgets
+        con = sqlite3.connect('MyDb.db') 
+        search = SearchInDataBase(master=self, by='name', con=con, table_name='clientes', display_table_cols=['nome', 'idade'])
         search.grid(row=0, column=1, sticky='nswe')
 
         # run
@@ -26,9 +27,13 @@ class App(ctk.CTk):
 
 
 class SearchInDataBase(ctk.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master, con: sqlite3.Connection, by: str, table_name: str, display_table_cols: list[str]):
         super().__init__(master=master)
-        self.nome = ctk.StringVar()
+        self.by = by
+        self.con = con
+        self.table_name = table_name
+        self.display_table_cols = display_table_cols 
+        self.str_entry = ctk.StringVar()
 
         # layout
         self.rowconfigure(index=0, weight=1, uniform='a')
@@ -56,8 +61,7 @@ class SearchInDataBase(ctk.CTkFrame):
         frame2 = ctk.CTkScrollableFrame(master=self)
         frame2.grid(row=1, column=0, sticky='nswe')
         
-        con = sqlite3.connect('MyDb.db')
-        query = pd.read_sql("SELECT * FROM clientes", con=con)
+        query = pd.read_sql(f"SELECT * FROM {self.table_name}", con=self.con)
         
         table = Table(master=frame2, values=query) 
         table.pack(fill='both', expand=True)
@@ -72,6 +76,12 @@ class SearchInDataBase(ctk.CTkFrame):
         new_data = query.to_numpy().tolist()
         new_data.insert(0, query.columns.values.tolist())
         table.update_values(new_data)
+    
+    def select_all_sql(self):
+        tables_str = ''
+        for table in self.display_table_cols:
+            tables_str += table + ','
+        tables_str = tables_str[:-2]
 
 
 
