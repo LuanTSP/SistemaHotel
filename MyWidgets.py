@@ -1,9 +1,10 @@
-import customtkinter as ctk
 import CTkTable
 import pandas as pd
 import numpy as np
+import ttkbootstrap as ttk
+from ttkbootstrap.tableview import Tableview
+from ttkbootstrap.validation import add_range_validation, add_regex_validation, add_text_validation
 import sqlite3
-from CTkToolTip import CTkToolTip
 
 # WIDGETS
 class Table(CTkTable.CTkTable):
@@ -46,112 +47,98 @@ class Table(CTkTable.CTkTable):
             self.values = new_data
 
 
-class SearchInDatabase(ctk.CTkFrame):
-    """
-        A Table widget with a field for searching data from a database
-        parameters:
-            master: parent widget
-            con: sqlite3.Connertion to a database
-            by: column to search by in a database table
-            table_name: name of the database table
-            display_table_cols: list of table columns names to display
-    """
-    
-    def __init__(self, master, con: sqlite3.Connection, by: str, table_name: str, display_table_cols: list):
-        super().__init__(master=master)
-        self.by = by
+class PandasTableView(Tableview):
+    def __init__(self,
+            master, 
+            rowdata=[],
+            paginated=False,
+            searchable=True,
+            headers=[],
+            bootstyle='litera',
+        ):
+        self.headers = headers
+        self.rowdata = rowdata
+        
+        # Checks if row data is pandas dataframe
+        if isinstance(rowdata, pd.DataFrame):
+            if self.headers == []:
+                self.headers = rowdata.columns.values
+            self.rowdata  = rowdata[self.headers].to_numpy().tolist()
+            
+
+        # initial setup
+        super().__init__(
+            master=master,
+            rowdata=self.rowdata,
+            coldata=self.headers,
+            paginated=paginated,
+            searchable=searchable,
+            bootstyle=bootstyle,
+        )
+
+
+class ClientForm(ttk.Labelframe):
+    def __init__(self, master, con: sqlite3.Connection, table_name: str, pandas_table=None):
+        # initial setup
         self.con = con
         self.table_name = table_name
-        self.display_table_cols = display_table_cols 
-        self.str_entry = ctk.StringVar()
+        self.pandas_table = pandas_table
+        super().__init__(master=master, text='Cadastro de Clientes')
 
         # layout
-        self.rowconfigure(index=0, weight=1, uniform='a')
-        self.rowconfigure(index=1, weight=5, uniform='a')
-        self.columnconfigure(index=0, weight=1, uniform='a')
-
-        # widgets
+        self.rowconfigure(index=(0,1,2,3,4,5,6,7), weight=1, uniform='a')
+        self.columnconfigure(index=(0,1,2,3,4,5,6,7), weight=1, uniform='a')
         
-        # Search Field
-        frame1 = ctk.CTkFrame(master=self)
-        
-        frame1.rowconfigure(index=0, weight=1, uniform='a')
-        frame1.columnconfigure(index=0, weight=4, uniform='a')
-        frame1.columnconfigure(index=1, weight=1, uniform='a')
+        # Nome, Sobrenome, Idade, cpf,
+        self.var_nome = ttk.StringVar()
+        label_nome = ttk.Label(master=self, text='Nome')
+        entry_nome = ttk.Entry(master=self, textvariable=self.var_nome)
+        add_text_validation(entry_nome, when='focusout')
+        label_nome.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
+        entry_nome.grid(row=0, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
 
-        frame1.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
+        self.var_sobrenome = ttk.StringVar()
+        label_sobrenome = ttk.Label(master=self, text='sobrenome')
+        entry_sobrenome = ttk.Entry(master=self, textvariable=self.var_sobrenome)
+        add_text_validation(entry_sobrenome, when='focusout')
+        label_sobrenome.grid(row=0, column=3, sticky='nswe', padx=5, pady=5)
+        entry_sobrenome.grid(row=0, column=4, columnspan=4, sticky='nswe', padx=5, pady=5)
 
-        entry = ctk.CTkEntry(master=frame1, placeholder_text='Enter a Name', textvariable=self.str_entry)
-        entry.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
+        self.var_idade = ttk.StringVar()
+        label_idade = ttk.Label(master=self, text='idade')
+        entry_idade = ttk.Entry(master=self, textvariable=self.var_idade)
+        add_range_validation(entry_idade, startrange=0, endrange=120, when='focusout')
+        label_idade.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
+        entry_idade.grid(row=1, column=1, columnspan=1, sticky='nswe', padx=5, pady=5)
 
-        btn = ctk.CTkButton(master=frame1, text="Search", command=lambda: self.update_query(table=table, con=con))
-        btn.grid(row=0, column=1, sticky='nswe', padx=5, pady=5)
+        self.var_cpf = ttk.StringVar()
+        label_cpf = ttk.Label(master=self, text='cpf')
+        entry_cpf = ttk.Entry(master=self, textvariable=self.var_cpf)
+        add_regex_validation(entry_cpf, pattern='^[0-9]{11}$', when='focusout')
+        label_cpf.grid(row=1, column=2, sticky='nswe', padx=5, pady=5)
+        entry_cpf.grid(row=1, column=3, columnspan=2, sticky='nswe', padx=5, pady=5)
 
-        # Table
-        frame2 = ctk.CTkScrollableFrame(master=self)
-        frame2.grid(row=1, column=0, sticky='nswe')
-        
-        query_str = self.select_all_sql_string()
-        query = pd.read_sql(query_str, con=self.con)
-        
-        table = Table(master=frame2, values=query) 
-        table.pack(fill='both', expand=True)
+        self.vars = [self.var_nome, self.var_sobrenome, self.var_cpf, self.var_idade]
 
-        # tooltips
-        CTkToolTip(widget=btn, message="search by name")
-        CTkToolTip(widget=entry, message="name")
+        # adicionar ao bando de dados
+        btn_cadastrar = ttk.Button(master=self, text='Cadastrar', command=self.add_to_database)
+        btn_cadastrar.grid(row=7, column=6, columnspan=2,sticky='nswe', padx=5, pady=5)
 
-    def update_query(self, table: Table, con):
-        query = pd.read_sql(f"{self.select_all_sql_string()} WHERE {self.by} LIKE '%{self.str_entry.get()}%'", con=con)
-        new_data = query.to_numpy().tolist()
-        new_data.insert(0, query.columns.values.tolist())
-        table.update_values(new_data)
-    
-    def select_all_sql_string(self):
-        tables_str = ''
-        for table in self.display_table_cols:
-            tables_str += table + ','
-        tables_str = tables_str[:-1]
-        return f"SELECT {tables_str} FROM {self.table_name}"
-
-
-# DATABASE
-class Database:
-    def __init__(self, con: sqlite3.Connection):
-        self.con = con
-
-    def insert_into(self, table_name: str, data):
-        if isinstance(data, type(None)):
-            raise ValueError("data parameter cannot be None type")
+    def add_to_database(self):
         cursor = self.con.cursor()
-        if isinstance(data, (list, tuple)):
-            cursor.execute(f"INSERT INTO {table_name} VALUES {tuple(data)}")
-            self.con.commit()
-    
-    def read(self, sql_string: str, return_as='list'):
-        cursor = self.con.cursor()
-        if return_as == 'list': # DEBUG Do not return heaaders
-            query = cursor.execute(sql_string)
-            return [list(row) for row in query]
-        if return_as =='dataframe':
-            return pd.read_sql(sql_string, con=self.con)
-        if return_as == 'dict':
-            return pd.read_sql(sql_string, con=self.con).to_dict()
-    
-    def delete(self, table_name: str, condition: str):
-        cursor = self.con.cursor()
-        delete_str = f"DELETE FROM {table_name} WHERE {condition}"
-        cursor.execute(delete_str)
-        self.con.commit()
-    
-    def update(self, table_name: str, values, condition):
-        update_str = f"UPDATE {table_name} SET {values} WHERE {condition}"
-        cursor = self.con.cursor()
-        cursor.execute(update_str)
+        cursor.execute(f"INSERT INTO {self.table_name} (nome, sobrenome, cpf, idade) VALUES ('{self.var_nome.get()}', '{self.var_sobrenome.get()}', {str(self.var_cpf.get())}, {str(self.var_idade.get())})")
         self.con.commit()
 
+        if self.pandas_table and isinstance(self.pandas_table, PandasTableView):
+            values = [self.var_nome.get(), self.var_sobrenome.get(), self.var_cpf.get(), self.var_idade.get()]
+            self.pandas_table.insert_row(index='end', values=values)
+            self.pandas_table.load_table_data(clear_filters=True)
+            self.clear_form()
+    
+    def clear_form(self):
+        for var in self.vars:
+            var.set(value='')
 
-
-            
+                    
 
 
