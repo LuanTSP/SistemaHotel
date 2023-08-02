@@ -1,31 +1,66 @@
+import ttkbootstrap as ttk
 import customtkinter as ctk
-from MyWidgets import SearchInDatabase, Database
+from ttkbootstrap.tableview import Tableview
+import pandas as pd
+import numpy as np
 import sqlite3
+
 
 class App(ctk.CTk):
     def __init__(self):
         # initial setup
         super().__init__()
-        self.geometry("800x500")
-        self.title("Sistema de Cadastro")
+        ctk.set_appearance_mode('light')
+        self.title('Sistema Hotel')
+        self.geometry('800x600')
 
         # layout
-        self.rowconfigure(index=(0,1), weight=1, uniform='a')
+        self.rowconfigure(index=0, weight=1, uniform='a')
+        self.rowconfigure(index=1, weight=9, uniform='a')
         self.columnconfigure(index=0, weight=1, uniform='a')
-        self.columnconfigure(index=1, weight=2, uniform='a')
-        
 
-        # widgets
+        # connection to database
         con = sqlite3.connect('MyDb.db')
-        search = SearchInDatabase(master=self, by='nome', con=con, table_name='clientes', display_table_cols=['nome', 'sobrenome', 'idade', 'cpf'])
-        search.grid(row=0, column=1, sticky='nswe')
-
-        database = Database(con=con)
-        database.update(table_name='clientes', values='idade=21', condition='idade=77')
-        print(database.read("SELECT nome, idade FROM clientes WHERE nome = 'Ferdinando'"))
+        
+        # searchfield
+        df = pd.read_sql("SELECT * FROM clientes", con=con)
+        # headers = ['nome', 'idade']
+        
+        table = PandasTableView(master=self, rowdata=df)
+        table.grid(row=1, column=0, sticky='nswe')
 
         # run
         self.mainloop()
 
+
+
+class PandasTableView(Tableview):
+    def __init__(self,
+            master, 
+            rowdata=[],
+            paginated=False,
+            searchable=True,
+            headers=[],
+            bootstyle='litera',
+        ):
+        self.headers = headers
+        self.rowdata = rowdata
+        
+        # Cheacks if row data is pandas dataframe
+        if isinstance(rowdata, pd.DataFrame):
+            if self.headers == []:
+                self.headers = rowdata.columns.values
+            self.rowdata  = rowdata[self.headers].to_numpy().tolist()
+            
+
+        # initial setup
+        super().__init__(
+            master=master,
+            rowdata=self.rowdata,
+            coldata=self.headers,
+            paginated=paginated,
+            searchable=searchable,
+            bootstyle=bootstyle,
+        )
 
 App()
