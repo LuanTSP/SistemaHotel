@@ -74,7 +74,10 @@ class PandasTableView(Tableview):
             paginated=paginated,
             searchable=searchable,
             bootstyle=bootstyle,
+            pagesize=100,
+            stripecolor=("#efefef", None)
         )
+        self.autofit_columns()
 
 
 class ClientForm(ttk.Labelframe):
@@ -162,7 +165,7 @@ class ClientForm(ttk.Labelframe):
         label_celular = ttk.Label(master=self, text='CELULAR')
         entry_celular = ttk.Entry(master=self, textvariable=self.var_celular)
 
-        label_email = ttk.Label(master=self, text='email')
+        label_email = ttk.Label(master=self, text='E-MAIL')
         entry_email = ttk.Entry(master=self, textvariable=self.var_email)
 
         label_empresa = ttk.Label(master=self, text='EMPRESA')
@@ -171,16 +174,19 @@ class ClientForm(ttk.Labelframe):
         label_cargo = ttk.Label(master=self, text='CARGO')
         entry_cargo = ttk.Entry(master=self, textvariable=self.var_cargo)
 
-        label_escolaridade = ttk.Label(master=self, text='ESCOLARIDADE')
+        label_escolaridade = ttk.Label(master=self, text='ESCOL.')
         entry_escolaridade = ttk.Entry(master=self, textvariable=self.var_escolaridade)
 
-        label_profis = ttk.Label(master=self, text='PROFISSÃO')
+        label_profis = ttk.Label(master=self, text='PROF.')
         entry_profis = ttk.Entry(master=self, textvariable=self.var_profis)
 
-        label_defic = ttk.Label(master=self, text='DEFICIÊNCIA')
+        label_defic = ttk.Label(master=self, text='DEFIC.')
         entry_defic = ttk.Entry(master=self, textvariable=self.var_defic)
 
         btn_cadastrar = ttk.Button(master=self, text='Cadastrar', command=self.add_to_database)
+        btn_limpar_formulario = ttk.Button(master=self, text='Limpar', command=self.clear_form, bootstyle='warning')
+        btn_remover_clientes = ttk.Button(master=self, text='Deletar', command=lambda: print('Deletando Cliente...'), bootstyle='danger')
+        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=lambda: print('Editando Dados'))
 
         # validation
         add_text_validation(entry_nome, when='focusout')
@@ -213,10 +219,36 @@ class ClientForm(ttk.Labelframe):
         entry_cep.grid(row=2, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
 
         label_nasc.grid(row=3, column=0, sticky='nswe')
-        entry_nasc.grid(row=3, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
-        
+        entry_nasc.grid(row=3, column=1, columnspan=1, sticky='nswe', padx=5, pady=5)
 
-        btn_cadastrar.grid(row=7, column=6, columnspan=2,sticky='nswe', padx=5, pady=5)
+        label_sexo.grid(row=3, column=2, sticky='nswe')
+        entry_sexo.grid(row=3, column=3, columnspan=1, sticky='nswe', padx=5, pady=5)
+        
+        label_celular.grid(row=3, column=4, sticky='nswe')
+        entry_celular.grid(row=3, column=5, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_email.grid(row=3, column=7, sticky='nswe')
+        entry_email.grid(row=3, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_empresa.grid(row=4, column=0, sticky='nswe')
+        entry_empresa.grid(row=4, column=1, columnspan=3, sticky='nswe', padx=5, pady=5)
+        
+        label_cargo.grid(row=4, column=4, sticky='nswe')
+        entry_cargo.grid(row=4, column=5, columnspan=2, sticky='nswe', padx=5, pady=5)
+        
+        label_escolaridade.grid(row=4, column=7, sticky='nswe')
+        entry_escolaridade.grid(row=4, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+        
+        label_profis.grid(row=5, column=0, sticky='nswe')
+        entry_profis.grid(row=5, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_defic.grid(row=5, column=3, sticky='nswe')
+        entry_defic.grid(row=5, column=4, columnspan=3, sticky='nswe', padx=5, pady=5)
+
+        btn_remover_clientes.grid(row=7, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_limpar_formulario.grid(row=7, column=2, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_editar_clientes.grid(row=7, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_cadastrar.grid(row=7, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
         
 
     def add_to_database(self):
