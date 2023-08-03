@@ -87,42 +87,137 @@ class ClientForm(ttk.Labelframe):
 
         # layout
         self.rowconfigure(index=(0,1,2,3,4,5,6,7), weight=1, uniform='a')
-        self.columnconfigure(index=(0,1,2,3,4,5,6,7), weight=1, uniform='a')
+        self.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
         
-        # Nome, Sobrenome, Idade, cpf,
+        # varibles
         self.var_nome = ttk.StringVar()
-        label_nome = ttk.Label(master=self, text='Nome')
-        entry_nome = ttk.Entry(master=self, textvariable=self.var_nome)
-        add_text_validation(entry_nome, when='focusout')
-        label_nome.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
-        entry_nome.grid(row=0, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
-
-        self.var_sobrenome = ttk.StringVar()
-        label_sobrenome = ttk.Label(master=self, text='sobrenome')
-        entry_sobrenome = ttk.Entry(master=self, textvariable=self.var_sobrenome)
-        add_text_validation(entry_sobrenome, when='focusout')
-        label_sobrenome.grid(row=0, column=3, sticky='nswe', padx=5, pady=5)
-        entry_sobrenome.grid(row=0, column=4, columnspan=4, sticky='nswe', padx=5, pady=5)
-
-        self.var_idade = ttk.StringVar()
-        label_idade = ttk.Label(master=self, text='idade')
-        entry_idade = ttk.Entry(master=self, textvariable=self.var_idade)
-        add_range_validation(entry_idade, startrange=0, endrange=120, when='focusout')
-        label_idade.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
-        entry_idade.grid(row=1, column=1, columnspan=1, sticky='nswe', padx=5, pady=5)
-
+        self.var_rg = ttk.StringVar()
         self.var_cpf = ttk.StringVar()
-        label_cpf = ttk.Label(master=self, text='cpf')
+        self.var_endereco = ttk.StringVar()
+        self.var_cidade = ttk.StringVar()
+        self.var_estado = ttk.StringVar()
+        self.var_pais = ttk.StringVar()
+        self.var_cep = ttk.StringVar()
+        self.var_nasc = ttk.StringVar()
+        self.var_sexo = ttk.StringVar()
+        self.var_celular = ttk.StringVar()
+        self.var_email = ttk.StringVar()
+        self.var_empresa = ttk.StringVar()
+        self.var_cargo = ttk.StringVar()
+        self.var_escolaridade = ttk.StringVar()
+        self.var_profis = ttk.StringVar()
+        self.var_defic = ttk.StringVar()
+
+        self.vars = [
+            self.var_nome, 
+            self.var_rg, 
+            self.var_cpf, 
+            self.var_endereco,
+            self.var_cidade,
+            self.var_estado,
+            self.var_pais,
+            self.var_cep,
+            self.var_nasc,
+            self.var_sexo,
+            self.var_celular,
+            self.var_email,
+            self.var_empresa,
+            self.var_cargo,
+            self.var_escolaridade,
+            self.var_profis,
+            self.var_defic,
+        ]
+
+        # create widgets
+        label_nome = ttk.Label(master=self, text='NOME')
+        entry_nome = ttk.Entry(master=self, textvariable=self.var_nome)
+
+        label_rg = ttk.Label(master=self, text='RG')
+        entry_rg = ttk.Entry(master=self, textvariable=self.var_rg)
+        
+        label_cpf = ttk.Label(master=self, text='CPF')
         entry_cpf = ttk.Entry(master=self, textvariable=self.var_cpf)
-        add_regex_validation(entry_cpf, pattern='^[0-9]{11}$', when='focusout')
-        label_cpf.grid(row=1, column=2, sticky='nswe', padx=5, pady=5)
-        entry_cpf.grid(row=1, column=3, columnspan=2, sticky='nswe', padx=5, pady=5)
 
-        self.vars = [self.var_nome, self.var_sobrenome, self.var_cpf, self.var_idade]
+        label_endereco = ttk.Label(master=self, text='ENDER.')
+        entry_endereco = ttk.Entry(master=self, textvariable=self.var_endereco)
 
-        # adicionar ao bando de dados
+        label_cidade = ttk.Label(master=self, text='CIDADE')
+        entry_cidade = ttk.Entry(master=self, textvariable=self.var_cidade)
+
+        label_estado = ttk.Label(master=self, text='ESTADO')
+        entry_estado = ttk.Entry(master=self, textvariable=self.var_estado)
+
+        label_pais = ttk.Label(master=self, text='PAIS')
+        entry_pais = ttk.Entry(master=self, textvariable=self.var_pais)
+
+        label_cep = ttk.Label(master=self, text='CEP')
+        entry_cep = ttk.Entry(master=self, textvariable=self.var_cep)
+
+        label_nasc = ttk.Label(master=self, text='NASC')
+        entry_nasc = ttk.Entry(master=self, textvariable=self.var_nasc)
+
+        label_sexo = ttk.Label(master=self, text='SEXO')
+        entry_sexo = ttk.Entry(master=self, textvariable=self.var_sexo)
+
+        label_celular = ttk.Label(master=self, text='CELULAR')
+        entry_celular = ttk.Entry(master=self, textvariable=self.var_celular)
+
+        label_email = ttk.Label(master=self, text='email')
+        entry_email = ttk.Entry(master=self, textvariable=self.var_email)
+
+        label_empresa = ttk.Label(master=self, text='EMPRESA')
+        entry_empresa = ttk.Entry(master=self, textvariable=self.var_empresa)
+        
+        label_cargo = ttk.Label(master=self, text='CARGO')
+        entry_cargo = ttk.Entry(master=self, textvariable=self.var_cargo)
+
+        label_escolaridade = ttk.Label(master=self, text='ESCOLARIDADE')
+        entry_escolaridade = ttk.Entry(master=self, textvariable=self.var_escolaridade)
+
+        label_profis = ttk.Label(master=self, text='PROFISSÃO')
+        entry_profis = ttk.Entry(master=self, textvariable=self.var_profis)
+
+        label_defic = ttk.Label(master=self, text='DEFICIÊNCIA')
+        entry_defic = ttk.Entry(master=self, textvariable=self.var_defic)
+
         btn_cadastrar = ttk.Button(master=self, text='Cadastrar', command=self.add_to_database)
+
+        # validation
+        add_text_validation(entry_nome, when='focusout')
+        add_text_validation(entry_rg, when='focusout')
+        add_regex_validation(entry_cpf, pattern='^[0-9]{11}$', when='focusout')
+
+        # place
+        label_nome.grid(row=0, column=0, sticky='nswe')
+        entry_nome.grid(row=0, column=1, columnspan=6, sticky='nswe', padx=5, pady=5)
+
+        label_rg.grid(row=0, column=7, sticky='nswe')
+        entry_rg.grid(row=0, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_cpf.grid(row=1, column=0, sticky='nswe')
+        entry_cpf.grid(row=1, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
+        
+        label_endereco.grid(row=1, column=3, sticky='nswe')
+        entry_endereco.grid(row=1, column=4, columnspan=6, sticky='nswe', padx=5, pady=5)
+
+        label_cidade.grid(row=2, column=0, sticky='nswe')
+        entry_cidade.grid(row=2, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_estado.grid(row=2, column=3, sticky='nswe')
+        entry_estado.grid(row=2, column=4, columnspan=1, sticky='nswe', padx=5, pady=5)
+
+        label_pais.grid(row=2, column=5, sticky='nswe')
+        entry_pais.grid(row=2, column=6, columnspan=1, sticky='nswe', padx=5, pady=5)
+
+        label_cep.grid(row=2, column=7, sticky='nswe')
+        entry_cep.grid(row=2, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_nasc.grid(row=3, column=0, sticky='nswe')
+        entry_nasc.grid(row=3, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
+        
+
         btn_cadastrar.grid(row=7, column=6, columnspan=2,sticky='nswe', padx=5, pady=5)
+        
 
     def add_to_database(self):
         cursor = self.con.cursor()
