@@ -44,6 +44,11 @@ class App(ctk.CTk):
         self.mainloop()
 
     def make_connection(self):
+        """
+            Makes Connection to Database
+            if database does not exist, creates it
+            along with table 'clientes' and default columns
+        """
         data_path = './HotelDatabase/'
         filename = 'hoteldatabase'
         os.makedirs(data_path, exist_ok=True)

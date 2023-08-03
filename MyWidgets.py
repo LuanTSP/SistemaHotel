@@ -93,23 +93,23 @@ class ClientForm(ttk.Labelframe):
         self.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
         
         # varibles
-        self.var_nome = ttk.StringVar()
-        self.var_rg = ttk.StringVar()
-        self.var_cpf = ttk.StringVar()
-        self.var_endereco = ttk.StringVar()
-        self.var_cidade = ttk.StringVar()
-        self.var_estado = ttk.StringVar()
-        self.var_pais = ttk.StringVar()
-        self.var_cep = ttk.StringVar()
-        self.var_nasc = ttk.StringVar()
-        self.var_sexo = ttk.StringVar()
-        self.var_celular = ttk.StringVar()
-        self.var_email = ttk.StringVar()
-        self.var_empresa = ttk.StringVar()
-        self.var_cargo = ttk.StringVar()
-        self.var_escolaridade = ttk.StringVar()
-        self.var_profis = ttk.StringVar()
-        self.var_defic = ttk.StringVar()
+        self.var_nome = ttk.StringVar(value='')
+        self.var_rg = ttk.StringVar(value='')
+        self.var_cpf = ttk.StringVar(value='')
+        self.var_endereco = ttk.StringVar(value='')
+        self.var_cidade = ttk.StringVar(value='')
+        self.var_estado = ttk.StringVar(value='')
+        self.var_pais = ttk.StringVar(value='')
+        self.var_cep = ttk.StringVar(value='')
+        self.var_nasc = ttk.StringVar(value='')
+        self.var_sexo = ttk.StringVar(value='')
+        self.var_celular = ttk.StringVar(value='')
+        self.var_email = ttk.StringVar(value='')
+        self.var_empresa = ttk.StringVar(value='')
+        self.var_cargo = ttk.StringVar(value='')
+        self.var_escolaridade = ttk.StringVar(value='')
+        self.var_profis = ttk.StringVar(value='')
+        self.var_defic = ttk.StringVar(value='')
 
         self.vars = [
             self.var_nome, 
@@ -252,15 +252,32 @@ class ClientForm(ttk.Labelframe):
         
 
     def add_to_database(self):
+        columns, data = self.get_form_data()
         cursor = self.con.cursor()
-        cursor.execute(f"INSERT INTO {self.table_name} (nome, sobrenome, cpf, idade) VALUES ('{self.var_nome.get()}', '{self.var_sobrenome.get()}', {str(self.var_cpf.get())}, {str(self.var_idade.get())})")
+        cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
         self.con.commit()
 
         if self.pandas_table and isinstance(self.pandas_table, PandasTableView):
-            values = [self.var_nome.get(), self.var_sobrenome.get(), self.var_cpf.get(), self.var_idade.get()]
+            values = [var.get() for var in self.vars]
             self.pandas_table.insert_row(index='end', values=values)
             self.pandas_table.load_table_data(clear_filters=True)
             self.clear_form()
+
+
+    def get_form_data(self):
+        data = "("
+        columns = "("
+        
+        cursor = self.con.cursor()
+        description = cursor.execute(f"SELECT * FROM {self.table_name}").description
+        table_columns = list(map(lambda x: x[0], description))
+        for var, desc in zip(self.vars, table_columns):
+            data += f"'{var.get()}',"
+            columns += f"{desc},"
+        data = data[:-1] + ')'
+        columns = columns[:-1] + ')'
+        return columns, data
+        
     
     def clear_form(self):
         for var in self.vars:
