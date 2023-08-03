@@ -140,5 +140,15 @@ class ClientForm(ttk.Labelframe):
             var.set(value='')
 
                     
+class MenuBar(ttk.Frame):
+    def __init__(self, master):
+        # initial setup
+        super().__init__(master=master, bootstyle="dark")
+    
+    def add_button(self, master, text: str, command=lambda x:x):
+        btn = ttk.Button(master=master, text=text, command=command)
+        btn.pack(side='left', fill='y', padx=5, pady=5)
+        return btn
+
 
 

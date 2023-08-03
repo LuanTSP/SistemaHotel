@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from MyWidgets import PandasTableView, ClientForm
+from MyWidgets import PandasTableView, ClientForm, MenuBar
 import pandas as pd
 import sqlite3
 
@@ -14,8 +14,16 @@ class App(ctk.CTk):
 
         # layout
         self.rowconfigure(index=0, weight=1, uniform='a')
-        self.rowconfigure(index=(1,2), weight=10, uniform='a')
+        self.rowconfigure(index=(1,2), weight=8, uniform='a')
         self.columnconfigure(index=(0,1), weight=1, uniform='a')
+
+        # WIDGETS ->
+
+        # menu bar
+        menu = MenuBar(master=self)
+        file_btn = menu.add_button(master=menu, text="File", command=lambda: print("File Button"))
+        settings_btn = menu.add_button(master=menu, text="Settings", command=lambda: print("Settings Button"))
+        menu.grid(row=0, column=0, columnspan=2, sticky='nswe')
 
         # connection to database
         con = sqlite3.connect('MyDb.db')
