@@ -195,6 +195,10 @@ class ClientForm(ttk.Labelframe):
         form_validation.validate_text(widget=entry_nome, required=True)
         form_validation.validate_numeric(widget=entry_rg)
         form_validation.validate_cpf(widget=entry_cpf)
+        form_validation.validate_numeric(widget=entry_cep)
+        form_validation.validate_date(widget=entry_nasc)
+        form_validation.validate_phone_number(widget=entry_celular, required=True)
+        form_validation.validate_contains(widget=entry_email, text='@')
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
@@ -281,7 +285,7 @@ class ClientForm(ttk.Labelframe):
         columns = columns[:-1] + ')'
         return columns, data
         
-    
+
     def clear_form(self):
         for var in self.vars:
             var.set(value='')
@@ -301,6 +305,7 @@ class MenuBar(ttk.Frame):
 class Validate:
     def __init__(self):
         self.all_valid = []
+        self.all_required = []
 
     def validate_cpf(self, widget, required=False):
         """
@@ -313,6 +318,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
         
         @validator
         def val(event: ValidationEvent):
@@ -321,11 +327,13 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern = re.compile('^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}-?[0-9]{2}')
             if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
@@ -343,6 +351,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
         
         @validator
         def val(event: ValidationEvent):
@@ -351,11 +360,13 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern = re.compile('^[0-9]{2}\.?[0-9]{3}\.?[0-9]{3}/?000[1-2]-?[0-9]{2}')
             if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
@@ -373,6 +384,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
         
         @validator
         def val(event: ValidationEvent):
@@ -381,11 +393,13 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             
             try:
                 float(event.postchangetext)
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             except:
@@ -403,6 +417,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
         
         @validator
         def val(event: ValidationEvent):
@@ -411,15 +426,18 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             
-            if event.postchangetext.isalpha():
+            pattern = re.compile('^[a-zA-Z0-9 ]+')
+            if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="key")
+        add_validation(widget=widget, func=val, when="focusout")
 
     def validate_options(self, widget, options: list, required=False):
         """
@@ -430,6 +448,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
 
         @validator
         def val(event: ValidationEvent, options=options):
@@ -438,11 +457,13 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             options = [str(option) for option in options]
             if event.postchangetext.strip() in options:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
@@ -455,6 +476,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
         
         @validator
         def val(event: ValidationEvent):
@@ -463,11 +485,13 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern = re.compile("^1\d\d(\d\d)?$|^0800 ?\d{3} ?\d{4}$|^(\(0?([1-9a-zA-Z][0-9a-zA-Z])?[1-9]\d\) ?|0?([1-9a-zA-Z][0-9a-zA-Z])?[1-9]\d[ .-]?)?(9|9[ .-])?[2-9]\d{3}[ .-]?\d{4}$")
             if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
@@ -480,6 +504,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
         
         @validator
         def val(event: ValidationEvent, pattern=pattern):
@@ -488,11 +513,13 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern = re.compile(pattern=pattern)
             if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
@@ -508,6 +535,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
 
         @validator
         def val(event: ValidationEvent):
@@ -516,12 +544,14 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             try:
                 n = float(event.postchangetext)
                 if (start <= float(n)) and (float(n) <= end):
+                    widget.configure(bootstyle='default')
                     valid.set(True)
                     return True
                 valid.set(False)
@@ -537,6 +567,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
         
         @validator
         def val(event: ValidationEvent):
@@ -545,10 +576,12 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             if text in event.postchangetext:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
@@ -561,6 +594,7 @@ class Validate:
 
         if required:
             valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
         
         @validator
         def val(event: ValidationEvent):
@@ -569,10 +603,48 @@ class Validate:
                 return False
             
             if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             if text not in event.postchangetext:
+                widget.configure(bootstyle='default')
+                valid.set(True)
+                return True
+            valid.set(False)
+            return False
+        add_validation(widget=widget, func=val, when="focusout")
+
+    def validate_date(self, widget, required=False):
+        """
+            Returns True if field value is date formated as xx/xx/xxxx or xx/xx/xx
+            Returns False otherwise
+        """
+        
+        valid = ttk.BooleanVar(value=True)
+        self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
+            self.all_required.append(tuple((valid, widget)))
+        
+        @validator
+        def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                widget.configure(bootstyle='default')
+                valid.set(True)
+                return True
+
+            pattern1 = re.compile('^[0-9]{2}/[0-9]{2}/[0-9]{2}')
+            pattern2 = re.compile('^[0-9]{2}/[0-9]{2}/[0-9]{4}')
+            one = not re.fullmatch(pattern=pattern1, string=event.postchangetext) == None
+            two = not re.fullmatch(pattern=pattern2, string=event.postchangetext) == None
+            if one or two:
+                widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
@@ -586,8 +658,15 @@ class Validate:
         if len(self.all_valid) == 0:
             return True
         
+        for val, widget in self.all_required:
+            text = str(widget.get())
+            if len(text) == 0:
+                widget.configure(bootstyle='danger')
+                val.set(False)
+                return False
+        
         for val in self.all_valid:
             if val.get() == False:
                 return False
         return True
-
+        

@@ -22,8 +22,8 @@ class App(ctk.CTk):
 
         # menu bar
         menu = MenuBar(master=self)
-        file_btn = menu.add_button(master=menu, text="File", command=lambda: print("File Button"))
-        settings_btn = menu.add_button(master=menu, text="Settings", command=lambda: print("Settings Button"))
+        menu.add_button(master=menu, text="File", command=lambda: print("File Button"))
+        menu.add_button(master=menu, text="Settings", command=lambda: print("Settings Button"))
         menu.grid(row=0, column=0, columnspan=2, sticky='nswe')
 
         # connection to database
