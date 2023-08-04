@@ -191,7 +191,7 @@ class ClientForm(ttk.Labelframe):
 
         # validation
         form_validation = Validate()
-        form_validation.validate_phone_number(widget=entry_nome)
+        form_validation.validate_cpf(widget=entry_nome)
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
@@ -299,13 +299,64 @@ class Validate:
     def __init__(self):
         self.all_valid = []
 
-    def validate_cpf(self, widget, variable):
-        pass
+    def validate_cpf(self, widget, required=False):
+        """
+            Returns True if field value is cpf formated xxxxxxxxxxx or xxx.xxx.xxx-xx
+            Returns False otherwise
+        """
+        
+        valid = ttk.BooleanVar(value=True)
+        self.all_valid.append(valid)
 
-    def validate_cnpj(self, widget, variable):
-        pass
+        if required:
+            valid.set(False)
+        
+        @validator
+        def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
 
-    def validate_numeric(self, widget):
+            pattern = re.compile('^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}-?[0-9]{2}')
+            if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+                valid.set(True)
+                return True
+            valid.set(False)
+            return False
+        add_validation(widget=widget, func=val, when="focusout")
+
+    def validate_cnpj(self, widget, required=False):
+        """
+            Returns True if field value is cpf formated xxxxxxxxxxxxxx or xx.xxx.xxx/0001-xx
+            Returns False otherwise
+        """
+        
+        valid = ttk.BooleanVar(value=True)
+        self.all_valid.append(valid)
+        
+        @validator
+        def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+
+            pattern = re.compile('^[0-9]{2}\.?[0-9]{3}\.?[0-9]{3}/?000[1-2]-?[0-9]{2}')
+            if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+                valid.set(True)
+                return True
+            valid.set(False)
+            return False
+        add_validation(widget=widget, func=val, when="focusout")
+
+    def validate_numeric(self, widget, required=False):
         """
             Returns True if field value is numeric and is not empty.
             Returns False otherwise
@@ -316,6 +367,14 @@ class Validate:
         
         @validator
         def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+            
             try:
                 float(event.postchangetext)
                 valid.set(True)
@@ -325,7 +384,7 @@ class Validate:
                 return False
         add_validation(widget=widget, func=val, when="focusout")
 
-    def validate_text(self, widget):
+    def validate_text(self, widget, required=False):
         """
             Returns True if field does not contains any numbers and is not empty.
             Returns False otherwise
@@ -335,6 +394,14 @@ class Validate:
         
         @validator
         def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+            
             if event.postchangetext.isalpha():
                 valid.set(True)
                 return True
@@ -342,7 +409,7 @@ class Validate:
             return False
         add_validation(widget=widget, func=val, when="focusout")
 
-    def validate_options(self, widget, options: list):
+    def validate_options(self, widget, options: list, requires=False):
         """
             Returns True if field contais one of options
         """
@@ -351,6 +418,14 @@ class Validate:
 
         @validator
         def val(event: ValidationEvent, options=options):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+
             options = [str(option) for option in options]
             if event.postchangetext.strip() in options:
                 valid.set(True)
@@ -359,12 +434,20 @@ class Validate:
             return False
         add_validation(widget=widget, func=val, when='focusout')
 
-    def validate_phone_number(self, widget):
+    def validate_phone_number(self, widget, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
         
         @validator
         def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+
             pattern = re.compile("^1\d\d(\d\d)?$|^0800 ?\d{3} ?\d{4}$|^(\(0?([1-9a-zA-Z][0-9a-zA-Z])?[1-9]\d\) ?|0?([1-9a-zA-Z][0-9a-zA-Z])?[1-9]\d[ .-]?)?(9|9[ .-])?[2-9]\d{3}[ .-]?\d{4}$")
             if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
                 valid.set(True)
@@ -373,12 +456,20 @@ class Validate:
             return False
         add_validation(widget=widget, func=val, when="focusout")
 
-    def validate_regex(self, widget, pattern: str):
+    def validate_regex(self, widget, pattern: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
         
         @validator
         def val(event: ValidationEvent, pattern=pattern):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+
             pattern = re.compile(pattern=pattern)
             if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
                 valid.set(True)
@@ -387,7 +478,7 @@ class Validate:
             return False
         add_validation(widget=widget, func=val, when="focusout")
 
-    def validate_range(self, widget, start: float, end: float):
+    def validate_range(self, widget, start: float, end: float, required=False):
         """
             Returns True if field is numeric and is in the closed interval [start, end]
         """
@@ -396,6 +487,14 @@ class Validate:
 
         @validator
         def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+
             try:
                 n = float(event.postchangetext)
                 if (start <= float(n)) and (float(n) <= end):
@@ -408,12 +507,20 @@ class Validate:
                 return False
         add_validation(widget=widget, func=val, when='focusout')
 
-    def validate_contains(self, widget, text: str):
+    def validate_contains(self, widget, text: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
         
         @validator
         def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+
             if text in event.postchangetext:
                 valid.set(True)
                 return True
@@ -421,12 +528,20 @@ class Validate:
             return False
         add_validation(widget=widget, func=val, when="focusout")
 
-    def validate_not_contains(self, widget, text: str):
+    def validate_not_contains(self, widget, text: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
         
         @validator
         def val(event: ValidationEvent):
+            if required and len(event.postchangetext) == 0:
+                valid.set(False)
+                return False
+            
+            if not required and len(event.postchangetext) == 0:
+                valid.set(True)
+                return True
+
             if text not in event.postchangetext:
                 valid.set(True)
                 return True
