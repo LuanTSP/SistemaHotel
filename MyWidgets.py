@@ -191,7 +191,10 @@ class ClientForm(ttk.Labelframe):
 
         # validation
         form_validation = Validate()
-        form_validation.validate_cpf(widget=entry_nome)
+        
+        form_validation.validate_text(widget=entry_nome, required=True)
+        form_validation.validate_numeric(widget=entry_rg)
+        form_validation.validate_cpf(widget=entry_cpf)
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
@@ -309,7 +312,7 @@ class Validate:
         self.all_valid.append(valid)
 
         if required:
-            valid.set(False)
+            valid.set(value=False)
         
         @validator
         def val(event: ValidationEvent):
@@ -337,6 +340,9 @@ class Validate:
         
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
         
         @validator
         def val(event: ValidationEvent):
@@ -364,6 +370,9 @@ class Validate:
         
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
         
         @validator
         def val(event: ValidationEvent):
@@ -389,8 +398,11 @@ class Validate:
             Returns True if field does not contains any numbers and is not empty.
             Returns False otherwise
         """
-        valid = ttk.BooleanVar(True)
+        valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
         
         @validator
         def val(event: ValidationEvent):
@@ -407,14 +419,17 @@ class Validate:
                 return True
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+        add_validation(widget=widget, func=val, when="key")
 
     def validate_options(self, widget, options: list, required=False):
         """
             Returns True if field contais one of options
         """
-        valid = ttk.BooleanVar(True)
+        valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
 
         @validator
         def val(event: ValidationEvent, options=options):
@@ -437,6 +452,9 @@ class Validate:
     def validate_phone_number(self, widget, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
         
         @validator
         def val(event: ValidationEvent):
@@ -459,6 +477,9 @@ class Validate:
     def validate_regex(self, widget, pattern: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
         
         @validator
         def val(event: ValidationEvent, pattern=pattern):
@@ -482,8 +503,11 @@ class Validate:
         """
             Returns True if field is numeric and is in the closed interval [start, end]
         """
-        valid = ttk.BooleanVar()
+        valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
 
         @validator
         def val(event: ValidationEvent):
@@ -510,6 +534,9 @@ class Validate:
     def validate_contains(self, widget, text: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
         
         @validator
         def val(event: ValidationEvent):
@@ -531,6 +558,9 @@ class Validate:
     def validate_not_contains(self, widget, text: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
+
+        if required:
+            valid.set(value=False)
         
         @validator
         def val(event: ValidationEvent):
