@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
-from ttkbootstrap.validation import add_range_validation, add_regex_validation, add_text_validation
+from ttkbootstrap.validation import validator, add_regex_validation, add_text_validation, add_validation, ValidationEvent
 import sqlite3
 
 # WIDGETS
@@ -186,12 +186,13 @@ class ClientForm(ttk.Labelframe):
         btn_cadastrar = ttk.Button(master=self, text='Cadastrar', command=self.add_to_database)
         btn_limpar_formulario = ttk.Button(master=self, text='Limpar', command=self.clear_form, bootstyle='warning')
         btn_remover_clientes = ttk.Button(master=self, text='Deletar', command=lambda: print('Deletando Cliente...'), bootstyle='danger')
-        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=lambda: print('Editando Dados'))
+        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=lambda: print(form_validation.check_validation()))
 
         # validation
-        add_text_validation(entry_nome, when='focusout')
+        form_validation = Validate()
         add_text_validation(entry_rg, when='focusout')
         add_regex_validation(entry_cpf, pattern='^[0-9]{11}$', when='focusout')
+        form_validation.validate_numeric(widget=entry_nome)
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
@@ -295,4 +296,112 @@ class MenuBar(ttk.Frame):
         return btn
 
 
+class Validate:
+    def __init__(self):
+        self.all_valid = []
+
+    def validate_cpf(self, widget, variable):
+        pass
+
+    def validate_cnpj(self, widget, variable):
+        pass
+
+    def validate_numeric(self, widget):
+        """
+            Returns True if field value is numeric and is not empty.
+            Returns False otherwise
+        """
+        
+        valid = ttk.BooleanVar(value=True)
+        self.all_valid.append(valid)
+        
+        @validator
+        def val(event: ValidationEvent):
+            try:
+                float(event.postchangetext)
+                valid.set(True)
+                return True
+            except:
+                valid.set(False)
+                return False
+        add_validation(widget=widget, func=val, when="focusout")
+
+    def validate_text(self, widget):
+        """
+            Returns True if field does not contains any numbers and is not empty.
+            Returns False otherwise
+        """
+        valid = ttk.BooleanVar(True)
+        self.all_valid.append(valid)
+        
+        @validator
+        def val(event: ValidationEvent):
+            if event.postchangetext.isalpha():
+                valid.set(True)
+                return True
+            valid.set(False)
+            return False
+        add_validation(widget=widget, func=val, when="focusout")
+
+    def validate_options(self, widget, options: list):
+        """
+            Returns True if field contais one of options
+        """
+        valid = ttk.BooleanVar(True)
+        self.all_valid.append(valid)
+
+        @validator
+        def val(event: ValidationEvent, options=options):
+            options = [str(option) for option in options]
+            if event.postchangetext.strip() in options:
+                valid.set(True)
+                return True
+            valid.set(False)
+            return False
+        add_validation(widget=widget, func=val, when='focusout')
+
+    def validate_phone_number(self, widget, variable):
+        pass
+
+    def validate_regex(self, widget, variable):
+        pass
+
+    def validate_range(self, widget, start: float, end: float):
+        """
+            Returns True if field is numeric and is in the closed interval [start, end]
+        """
+        valid = ttk.BooleanVar()
+        self.all_valid.append(valid)
+
+        @validator
+        def val(event: ValidationEvent):
+            try:
+                n = float(event.postchangetext)
+                if (start <= float(n)) and (float(n) <= end):
+                    valid.set(True)
+                    return True
+                valid.set(False)
+                return False
+            except:
+                valid.set(False)
+                return False
+        add_validation(widget=widget, func=val, when='focusout')
+
+    def validate_contains(self, widget, variable):
+        pass
+
+    def validate_not_contains(self, widget, variable):
+        pass
+
+    def check_validation(self):
+        """
+            Return True if all fields are validated else return False
+        """
+        if len(self.all_valid) == 0:
+            return True
+        
+        for val in self.all_valid:
+            if val.get() == False:
+                return False
+        return True
 
