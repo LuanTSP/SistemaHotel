@@ -409,7 +409,7 @@ class Validate:
             return False
         add_validation(widget=widget, func=val, when="focusout")
 
-    def validate_options(self, widget, options: list, requires=False):
+    def validate_options(self, widget, options: list, required=False):
         """
             Returns True if field contais one of options
         """
