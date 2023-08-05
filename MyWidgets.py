@@ -275,6 +275,9 @@ class ClientForm(ttk.Labelframe):
         cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
         self.con.commit()
 
+        toast = ToastNotification(title="Success", message="Client added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
+        toast.show_toast()
+
         if self.pandas_table and isinstance(self.pandas_table, PandasTableView):
             values = [var.get() for var in self.vars]
             self.pandas_table.insert_row(index='end', values=values)
