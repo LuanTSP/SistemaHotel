@@ -208,7 +208,14 @@ class ClientForm(ttk.Labelframe):
         # validation
         
         self.form_validation.validate_text(widget=entry_nome, textvariable=self.var_nome, required=True)
+        self.form_validation.validate_numeric(widget=entry_rg, textvariable=self.var_rg, required=True)
+        self.form_validation.validate_cpf(widget=entry_cpf, textvariable=self.var_cpf)
+        self.form_validation.validate_numeric(widget=entry_cep, textvariable=self.var_cep)
+        self.form_validation.validate_date(widget=entry_nasc, textvariable=self.var_nasc)
+        self.form_validation.validate_options(widget=entry_sexo, textvariable=self.var_sexo, options=['Masculino', 'Feminino'])
         self.form_validation.validate_phone_number(widget=entry_celular, textvariable=self.var_celular, required=True)
+        self.form_validation.validate_contains(widget=entry_email, textvariable=self.var_email, text='@')
+        self.form_validation.validate_options(widget=entry_escolaridade, textvariable=self.var_escolaridade, options=['Não tem', 'Fundamental','Médio', 'Superior'])
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
@@ -355,7 +362,7 @@ class Validate:
         self.all_valid = []
         self.all_required = []
 
-    def validate_cpf(self, widget, required=False):
+    def validate_cpf(self, widget, textvariable, required=False):
         """
             Returns True if field value is cpf formated xxxxxxxxxxx or xxx.xxx.xxx-xx
             Returns False otherwise
@@ -368,27 +375,28 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern = re.compile('^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}-?[0-9]{2}')
-            if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+            if not re.fullmatch(pattern=pattern, string=textvariable.get()) == None:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+        textvariable.trace('w', val)
 
-    def validate_cnpj(self, widget, required=False):
+    def validate_cnpj(self, widget, textvariable, required=False):
         """
             Returns True if field value is cpf formated xxxxxxxxxxxxxx or xx.xxx.xxx/0001-xx
             Returns False otherwise
@@ -401,27 +409,28 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern = re.compile('^[0-9]{2}\.?[0-9]{3}\.?[0-9]{3}/?000[1-2]-?[0-9]{2}')
-            if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+            if not re.fullmatch(pattern=pattern, string=textvariable.get()) == None:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+        textvariable.trace('w', val)
 
-    def validate_numeric(self, widget, required=False):
+    def validate_numeric(self, widget, textvariable, required=False):
         """
             Returns True if field value is numeric and is not empty.
             Returns False otherwise
@@ -434,26 +443,27 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             
             try:
-                float(event.postchangetext)
+                float(textvariable.get())
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             except:
+                widget.configure(bootstyle='danger')
                 valid.set(False)
                 return False
-        add_validation(widget=widget, func=val, when="focusout")
+        textvariable.trace('w', val)
 
     def validate_text(self, widget, textvariable, required=False):
         """
@@ -469,6 +479,7 @@ class Validate:
         
         def val(*args):
             if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
@@ -482,12 +493,13 @@ class Validate:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
 
         textvariable.trace('w', val)
 
-    def validate_options(self, widget, options: list, required=False):
+    def validate_options(self, widget, textvariable, options: list, required=False):
         """
             Returns True if field contais one of options
         """
@@ -498,25 +510,26 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
 
-        @validator
-        def val(event: ValidationEvent, options=options):
-            if required and len(event.postchangetext) == 0:
+        def val(*args, options=options):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             options = [str(option) for option in options]
-            if event.postchangetext.strip() in options:
+            if textvariable.get().strip() in options:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when='focusout')
+        textvariable.trace('w', val)
 
     def validate_phone_number(self, widget, textvariable ,required=False):
         valid = ttk.BooleanVar(value=True)
@@ -528,6 +541,7 @@ class Validate:
         
         def val(*args):
             if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='danger')
                 valid.set(False)
                 return False
             
@@ -541,11 +555,12 @@ class Validate:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
         textvariable.trace('w', val)
 
-    def validate_regex(self, widget, pattern: str, required=False):
+    def validate_regex(self, widget, textvariable, pattern: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
 
@@ -553,27 +568,28 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent, pattern=pattern):
-            if required and len(event.postchangetext) == 0:
+        def val(*args, pattern=pattern):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern = re.compile(pattern=pattern)
-            if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+            if not re.fullmatch(pattern=pattern, string=textvariable.get()) == None:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+        textvariable.trace('w',val)
 
-    def validate_range(self, widget, start: float, end: float, required=False):
+    def validate_range(self, widget, textvariable, start: float, end: float, required=False):
         """
             Returns True if field is numeric and is in the closed interval [start, end]
         """
@@ -584,31 +600,33 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
 
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args, start=start, end=end):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             try:
-                n = float(event.postchangetext)
+                n = float(textvariable.get())
                 if (start <= float(n)) and (float(n) <= end):
                     widget.configure(bootstyle='default')
                     valid.set(True)
                     return True
+                widget.configure(bootstyle='danger')
                 valid.set(False)
                 return False
             except:
+                widget.configure(bootstyle='danger')
                 valid.set(False)
                 return False
-        add_validation(widget=widget, func=val, when='focusout')
+        textvariable.trace('w', val)
 
-    def validate_contains(self, widget, text: str, required=False):
+    def validate_contains(self, widget, textvariable, text: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
 
@@ -616,26 +634,27 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args, text=text):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
-            if text in event.postchangetext:
+            if text in textvariable.get():
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+        textvariable.trace('w', val)
 
-    def validate_not_contains(self, widget, text: str, required=False):
+    def validate_not_contains(self, widget, textvariable, text: str, required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
 
@@ -643,26 +662,27 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args, text):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
-            if text not in event.postchangetext:
+            if text not in textvariable.get():
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+        textvariable.trace('w', val)
 
-    def validate_date(self, widget, required=False):
+    def validate_date(self, widget, textvariable, required=False):
         """
             Returns True if field value is date formated as xx/xx/xxxx or xx/xx/xx
             Returns False otherwise
@@ -675,28 +695,29 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args):
+            if required and len(textvariable.get()) == 0:
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern1 = re.compile('^[0-9]{2}/[0-9]{2}/[0-9]{2}')
             pattern2 = re.compile('^[0-9]{2}/[0-9]{2}/[0-9]{4}')
-            one = not re.fullmatch(pattern=pattern1, string=event.postchangetext) == None
-            two = not re.fullmatch(pattern=pattern2, string=event.postchangetext) == None
+            one = not re.fullmatch(pattern=pattern1, string=textvariable.get()) == None
+            two = not re.fullmatch(pattern=pattern2, string=textvariable.get()) == None
             if one or two:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
+            widget.configure(bootstyle='danger')
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+        textvariable.trace('w', val)
 
     def check_validation(self):
         """
@@ -708,7 +729,7 @@ class Validate:
         for val, widget in self.all_required:
             text = str(widget.get())
             if len(text) == 0:
-                widget.configure(bootstyle='danger')
+                widget.configure(bootstyle='warning')
                 val.set(False)
                 return False
         
