@@ -203,17 +203,12 @@ class ClientForm(ttk.Labelframe):
         btn_cadastrar = ttk.Button(master=self, text='Cadastrar', command=self.add_to_database)
         btn_limpar_formulario = ttk.Button(master=self, text='Limpar', command=self.clear_form, bootstyle='warning')
         btn_remover_clientes = ttk.Button(master=self, text='Deletar', command=lambda: print('Deletando Cliente...'), bootstyle='danger')
-        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=lambda: print("Editando dado cliente..."), bootstyle="primary-outline")
+        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=self.fill_form, bootstyle="primary-outline")
 
         # validation
         
-        self.form_validation.validate_text(widget=entry_nome, required=True)
-        self.form_validation.validate_numeric(widget=entry_rg)
-        self.form_validation.validate_cpf(widget=entry_cpf)
-        self.form_validation.validate_numeric(widget=entry_cep)
-        self.form_validation.validate_date(widget=entry_nasc)
-        self.form_validation.validate_phone_number(widget=entry_celular, required=True)
-        self.form_validation.validate_contains(widget=entry_email, text='@')
+        self.form_validation.validate_text(widget=entry_nome, textvariable=self.var_nome, required=True)
+        self.form_validation.validate_phone_number(widget=entry_celular, textvariable=self.var_celular, required=True)
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
@@ -319,6 +314,29 @@ class ClientForm(ttk.Labelframe):
         for var in self.vars:
             var.set(value='')
        
+    def fill_form(self):
+        """
+            Fills all form data with selected row of pandas table view
+        """
+        
+        # checks if pandas table is connected
+        if not isinstance(self.pandas_table, PandasTableView):
+            toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning')
+            toast.show_toast()
+            return
+        
+        # checks if user didn't select more than one row
+        rows = self.pandas_table.get_rows(selected=True)
+        if len(rows) > 1:
+            toast = ToastNotification(title="Error", message="Please select row at a time", bootstyle='danger')
+            toast.show_toast()
+            return
+
+        # fill form
+        rows = rows[0].values
+        for var , value, in zip(self.vars, rows[1:]): # discard id column
+            var.set(value=value)
+        
 
 
 class MenuBar(ttk.Frame):
@@ -437,7 +455,7 @@ class Validate:
                 return False
         add_validation(widget=widget, func=val, when="focusout")
 
-    def validate_text(self, widget, required=False):
+    def validate_text(self, widget, textvariable, required=False):
         """
             Returns True if field does not contains any numbers and is not empty.
             Returns False otherwise
@@ -449,25 +467,25 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args):
+            if required and len(textvariable.get()) == 0:
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             
             pattern = re.compile('^[a-zA-Z0-9 ]+')
-            if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+            if not re.fullmatch(pattern=pattern, string=textvariable.get()) == None:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+
+        textvariable.trace('w', val)
 
     def validate_options(self, widget, options: list, required=False):
         """
@@ -500,7 +518,7 @@ class Validate:
             return False
         add_validation(widget=widget, func=val, when='focusout')
 
-    def validate_phone_number(self, widget, required=False):
+    def validate_phone_number(self, widget, textvariable ,required=False):
         valid = ttk.BooleanVar(value=True)
         self.all_valid.append(valid)
 
@@ -508,25 +526,24 @@ class Validate:
             valid.set(value=False)
             self.all_required.append(tuple((valid, widget)))
         
-        @validator
-        def val(event: ValidationEvent):
-            if required and len(event.postchangetext) == 0:
+        def val(*args):
+            if required and len(textvariable.get()) == 0:
                 valid.set(False)
                 return False
             
-            if not required and len(event.postchangetext) == 0:
+            if not required and len(textvariable.get()) == 0:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
 
             pattern = re.compile("^1\d\d(\d\d)?$|^0800 ?\d{3} ?\d{4}$|^(\(0?([1-9a-zA-Z][0-9a-zA-Z])?[1-9]\d\) ?|0?([1-9a-zA-Z][0-9a-zA-Z])?[1-9]\d[ .-]?)?(9|9[ .-])?[2-9]\d{3}[ .-]?\d{4}$")
-            if not re.fullmatch(pattern=pattern, string=event.postchangetext) == None:
+            if not re.fullmatch(pattern=pattern, string=textvariable.get()) == None:
                 widget.configure(bootstyle='default')
                 valid.set(True)
                 return True
             valid.set(False)
             return False
-        add_validation(widget=widget, func=val, when="focusout")
+        textvariable.trace('w', val)
 
     def validate_regex(self, widget, pattern: str, required=False):
         valid = ttk.BooleanVar(value=True)
