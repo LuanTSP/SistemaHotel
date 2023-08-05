@@ -1,9 +1,12 @@
 import CTkTable
 import pandas as pd
 import numpy as np
+import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.validation import validator, add_validation, ValidationEvent
+from ttkbootstrap.toast import ToastNotification
+from ttkbootstrap.icons import Icon
 import sqlite3
 import re
 
@@ -82,11 +85,13 @@ class PandasTableView(Tableview):
 
 
 class ClientForm(ttk.Labelframe):
+
     def __init__(self, master, con: sqlite3.Connection, table_name: str, pandas_table=None):
         # initial setup
         self.con = con
         self.table_name = table_name
         self.pandas_table = pandas_table
+        self.form_validation = Validate()
         super().__init__(master=master, text='Cadastro de Clientes')
 
         # layout
@@ -187,18 +192,17 @@ class ClientForm(ttk.Labelframe):
         btn_cadastrar = ttk.Button(master=self, text='Cadastrar', command=self.add_to_database)
         btn_limpar_formulario = ttk.Button(master=self, text='Limpar', command=self.clear_form, bootstyle='warning')
         btn_remover_clientes = ttk.Button(master=self, text='Deletar', command=lambda: print('Deletando Cliente...'), bootstyle='danger')
-        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=lambda: print(form_validation.check_validation()))
+        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=lambda: print("Editando dado cliente..."), bootstyle="primary-outline")
 
         # validation
-        form_validation = Validate()
         
-        form_validation.validate_text(widget=entry_nome, required=True)
-        form_validation.validate_numeric(widget=entry_rg)
-        form_validation.validate_cpf(widget=entry_cpf)
-        form_validation.validate_numeric(widget=entry_cep)
-        form_validation.validate_date(widget=entry_nasc)
-        form_validation.validate_phone_number(widget=entry_celular, required=True)
-        form_validation.validate_contains(widget=entry_email, text='@')
+        self.form_validation.validate_text(widget=entry_nome, required=True)
+        self.form_validation.validate_numeric(widget=entry_rg)
+        self.form_validation.validate_cpf(widget=entry_cpf)
+        self.form_validation.validate_numeric(widget=entry_cep)
+        self.form_validation.validate_date(widget=entry_nasc)
+        self.form_validation.validate_phone_number(widget=entry_celular, required=True)
+        self.form_validation.validate_contains(widget=entry_email, text='@')
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
@@ -257,8 +261,15 @@ class ClientForm(ttk.Labelframe):
         btn_editar_clientes.grid(row=7, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_cadastrar.grid(row=7, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
         
-
     def add_to_database(self):
+        """
+            Add form data to the database
+        """
+        if not self.form_validation.check_validation():
+            toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+
         columns, data = self.get_form_data()
         cursor = self.con.cursor()
         cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
@@ -270,8 +281,10 @@ class ClientForm(ttk.Labelframe):
             self.pandas_table.load_table_data(clear_filters=True)
             self.clear_form()
 
-
     def get_form_data(self):
+        """
+            Get form filled data and table headers and returns them as formated string for SQL database insertion
+        """
         data = "("
         columns = "("
         
@@ -283,14 +296,16 @@ class ClientForm(ttk.Labelframe):
             columns += f"{desc},"
         data = data[:-1] + ')'
         columns = columns[:-1] + ')'
+        
         return columns, data
         
-
     def clear_form(self):
         for var in self.vars:
             var.set(value='')
+       
 
-                    
+
+
 class MenuBar(ttk.Frame):
     def __init__(self, master):
         # initial setup
