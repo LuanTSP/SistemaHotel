@@ -53,21 +53,23 @@ class Table(CTkTable.CTkTable):
 
 class PandasTableView(Tableview):
     def __init__(self,
-            master, 
-            rowdata=[],
+            master,
+            con: sqlite3.Connection,
+            table_name: str,
             paginated=False,
             searchable=True,
-            headers=[],
+            headers:list=[],
             bootstyle='litera',
         ):
+        self.con = con
+        self.table_name = table_name
         self.headers = headers
-        self.rowdata = rowdata
+        self.rowdata = pd.read_sql(f"SELECT * FROM {self.table_name}", con=self.con)
         
-        # Checks if row data is pandas dataframe
-        if isinstance(rowdata, pd.DataFrame):
-            if self.headers == []:
-                self.headers = rowdata.columns.values
-            self.rowdata  = rowdata[self.headers].to_numpy().tolist()
+        # Checks select columns to display on table
+        if self.headers == []:
+            self.headers = self.rowdata.columns.values
+        self.rowdata  = self.rowdata[self.headers].to_numpy().tolist()
             
 
         # initial setup
@@ -82,11 +84,20 @@ class PandasTableView(Tableview):
             stripecolor=("#efefef", None)
         )
         self.autofit_columns()
+    
+    def update_table(self):
+        rowdata = pd.read_sql(f"SELECT * FROM {self.table_name}", con=self.con)
+        rowdata = rowdata[self.headers].to_numpy().tolist()
+        self.build_table_data(coldata=self.headers, rowdata=rowdata)
+        self.autofit_columns()
+
+
+
 
 
 class ClientForm(ttk.Labelframe):
 
-    def __init__(self, master, con: sqlite3.Connection, table_name: str, pandas_table=None):
+    def __init__(self, master, con: sqlite3.Connection, table_name: str, pandas_table: PandasTableView=None):
         # initial setup
         self.con = con
         self.table_name = table_name
@@ -265,24 +276,25 @@ class ClientForm(ttk.Labelframe):
         """
             Add form data to the database
         """
+        # check if form is valid and display toast notification
         if not self.form_validation.check_validation():
             toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
             toast.show_toast()
             return
 
+        # insert values into database
         columns, data = self.get_form_data()
         cursor = self.con.cursor()
         cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
         self.con.commit()
 
+        # display toast notification if success
         toast = ToastNotification(title="Success", message="Client added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
         toast.show_toast()
 
-        if self.pandas_table and isinstance(self.pandas_table, PandasTableView):
-            values = [var.get() for var in self.vars]
-            self.pandas_table.insert_row(index='end', values=values)
-            self.pandas_table.load_table_data(clear_filters=True)
-            self.clear_form()
+        # updates pandas table if there is pandas table connected
+        if isinstance(self.pandas_table, PandasTableView):
+            self.pandas_table.update_table()
 
     def get_form_data(self):
         """
@@ -293,12 +305,13 @@ class ClientForm(ttk.Labelframe):
         
         cursor = self.con.cursor()
         description = cursor.execute(f"SELECT * FROM {self.table_name}").description
-        table_columns = list(map(lambda x: x[0], description))
+        table_columns = list(map(lambda x: x[0], description))[1:] # discard id to be added automaticaly by sqlite3
         for var, desc in zip(self.vars, table_columns):
             data += f"'{var.get()}',"
             columns += f"{desc},"
         data = data[:-1] + ')'
         columns = columns[:-1] + ')'
+        print(columns)
         
         return columns, data
         
@@ -306,7 +319,6 @@ class ClientForm(ttk.Labelframe):
         for var in self.vars:
             var.set(value='')
        
-
 
 
 class MenuBar(ttk.Frame):

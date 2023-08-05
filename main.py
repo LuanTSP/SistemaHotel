@@ -12,6 +12,7 @@ class App(ctk.CTk):
         ctk.set_appearance_mode('light')
         self.title('Sistema Hotel')
         self.geometry('1280x720')
+        self.con = self.make_connection() # connection to database
 
         # layout
         self.rowconfigure(index=0, weight=1, uniform='a')
@@ -26,14 +27,11 @@ class App(ctk.CTk):
         menu.add_button(master=menu, text="Settings", command=lambda: print("Settings Button"))
         menu.grid(row=0, column=0, columnspan=2, sticky='nswe')
 
-        # connection to database
-        self.make_connection()
-        # self.make_sample_data() # add 100 sample recordas to database
+        # self.make_sample_data() # add 100 sample records to database
 
         # searchfield
-        df = pd.read_sql("SELECT * FROM clientes", con=self.con)
         
-        table = PandasTableView(master=self, rowdata=df, paginated=True)
+        table = PandasTableView(master=self, con=self.con, table_name='clientes', paginated=True)
         table.grid(row=1, column=1, rowspan=2, sticky='nswe')
 
         # client form
@@ -52,10 +50,11 @@ class App(ctk.CTk):
         data_path = './HotelDatabase/'
         filename = 'hoteldatabase'
         os.makedirs(data_path, exist_ok=True)
-        self.con = sqlite3.connect(database=data_path + filename)
-        self.con.execute("""
+        con = sqlite3.connect(database=data_path + filename)
+        con.execute("""
             CREATE TABLE IF NOT EXISTS clientes
-                (nome TEXT,
+                (client_id INTEGER PRIMARY KEY,
+                nome TEXT,
                 rg TEXT,
                 cpf TEXT,
                 endereco TEXT,
@@ -73,6 +72,7 @@ class App(ctk.CTk):
                 profis TEXT,
                 defic TEXT)
             """)
+        return con
 
     def make_sample_data(self):
         nomes = ['Fabio', 'Carlos', 'Ana', 'Felipe', 'Justilho', 'Caxias', 'Jacinto', 'Luan', 'Sergio', 'Luis', 'Janaina', 'Kleber']
