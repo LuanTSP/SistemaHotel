@@ -13,6 +13,10 @@ class App(ctk.CTk):
         self.title('Sistema Hotel')
         self.geometry('1280x720')
 
+        # Connect to databases
+        self.con = self.make_connection()
+
+
         # layout
         self.rowconfigure(index=0, weight=1, uniform='a')
         self.rowconfigure(index=1, weight=13, uniform='a')
@@ -31,7 +35,7 @@ class App(ctk.CTk):
         notebook.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
 
         # Systems
-        controle_clientes = Controle_Clientes(master=notebook)
+        controle_clientes = Controle_Clientes(master=notebook, con=self.con, table_name='clientes')
         controle_clientes.pack(fill='both', expand=True)
 
         controle_reservas = ctk.CTkFrame(master=notebook)
@@ -44,28 +48,6 @@ class App(ctk.CTk):
         # run
         self.mainloop()
 
-
-
-class Controle_Clientes(ctk.CTkFrame):
-    def __init__(self, master):
-        # initial setup
-        super().__init__(master=master)
-
-        # layout
-        self.rowconfigure(index=(0,1), weight=1, uniform='a')
-        self.columnconfigure(index=(0,1), weight=1, uniform='a')
-        self.con = self.make_connection() # connection to database
-
-        # self.make_sample_data() # add 100 sample records to database
-
-        # pandas table
-        table = PandasTableView(master=self, con=self.con, table_name='clientes', paginated=True)
-        table.grid(row=0, column=1, rowspan=2, sticky='nswe')
-
-        # client form
-        client_form = ClientForm(master=self, con=self.con, table_name='clientes', pandas_table=table)
-        client_form.grid(row=0, column=0, sticky='nswe')
-
     def make_connection(self):
         """
             Makes Connection to Database
@@ -76,6 +58,8 @@ class Controle_Clientes(ctk.CTkFrame):
         filename = 'baseclientes.db'
         os.makedirs(data_path, exist_ok=True)
         con = sqlite3.connect(database=data_path + filename)
+        
+        # create table clientes
         con.execute("""
             CREATE TABLE IF NOT EXISTS clientes
                 (client_id INTEGER PRIMARY KEY,
@@ -97,7 +81,33 @@ class Controle_Clientes(ctk.CTkFrame):
                 profis TEXT,
                 defic TEXT)
             """)
+        
+        # create table reservas
+        # ... TO DO
         return con
+
+
+
+class Controle_Clientes(ctk.CTkFrame):
+    def __init__(self, master, con: sqlite3.Connection, table_name: str):
+        # initial setup
+        super().__init__(master=master)
+        self.con = con
+        self.table_name = table_name
+
+        # layout
+        self.rowconfigure(index=(0,1), weight=1, uniform='a')
+        self.columnconfigure(index=(0,1), weight=1, uniform='a')
+
+        # self.make_sample_data() # add 100 sample records to database
+
+        # pandas table
+        table = PandasTableView(master=self, con=self.con, table_name='clientes', paginated=True)
+        table.grid(row=0, column=1, rowspan=2, sticky='nswe')
+
+        # client form
+        client_form = ClientForm(master=self, con=self.con, table_name='clientes', pandas_table=table)
+        client_form.grid(row=0, column=0, sticky='nswe')
 
     def make_sample_data(self):
         nomes = ['Fabio', 'Carlos', 'Ana', 'Felipe', 'Justilho', 'Caxias', 'Jacinto', 'Luan', 'Sergio', 'Luis', 'Janaina', 'Kleber']
@@ -135,7 +145,6 @@ class Controle_Clientes(ctk.CTkFrame):
             values = f"('{nome}', '{rg}', '{cpf}', '{endereco}', '{cidade}', '{estado}', '{pais}', '{cep}', '{nasc}', '{sexo}', '{celular}', '{email}', '{empresa}', '{cargo}', '{escolaridade}', '{profis}', '{defic}')"
             self.con.execute(f"INSERT INTO clientes (nome, rg, cpf, endereco, cidade, estado, pais, cep, nasc, sexo, celular, email, empresa, cargo, escolaridade, profis, defic) VALUES {values}")
             self.con.commit()
-
 
 
 App()
