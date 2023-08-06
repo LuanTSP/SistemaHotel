@@ -12,7 +12,6 @@ class App(ctk.CTk):
         ctk.set_appearance_mode('light')
         self.title('Sistema Hotel')
         self.geometry('1280x720')
-        self.con = self.make_connection() # connection to database
 
         # layout
         self.rowconfigure(index=0, weight=1, uniform='a')
@@ -27,22 +26,45 @@ class App(ctk.CTk):
         menu.add_button(master=menu, text="Settings", command=lambda: print("Settings Button"))
         menu.grid(row=0, column=0, sticky='nswe')
 
-        tabs = ttk.Notebook(master=self)
-        tabs.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
+        # tabs
+        notebook = ttk.Notebook(master=self)
+        notebook.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
 
-        # self.make_sample_data() # add 100 sample records to database
+        # Systems
+        controle_clientes = Controle_Clientes(master=notebook)
+        controle_clientes.pack(fill='both', expand=True)
 
-        # searchfield
-        
-        # table = PandasTableView(master=self, con=self.con, table_name='clientes', paginated=True)
-        # table.grid(row=1, column=1, rowspan=2, sticky='nswe')
+        controle_reservas = ctk.CTkFrame(master=notebook)
+        controle_reservas.pack(fill='both', expand=True)
 
-        # # client form
-        # client_form = ClientForm(master=self, con=self.con, table_name='clientes')
-        # client_form.grid(row=1, column=0, sticky='nswe')
+        # adding to notebook
+        notebook.add(child=controle_clientes, text='Clientes')
+        notebook.add(child=controle_reservas, text='Reservas')
 
         # run
         self.mainloop()
+
+
+
+class Controle_Clientes(ctk.CTkFrame):
+    def __init__(self, master):
+        # initial setup
+        super().__init__(master=master)
+
+        # layout
+        self.rowconfigure(index=(0,1), weight=1, uniform='a')
+        self.columnconfigure(index=(0,1), weight=1, uniform='a')
+        self.con = self.make_connection() # connection to database
+
+        # self.make_sample_data() # add 100 sample records to database
+
+        # pandas table
+        table = PandasTableView(master=self, con=self.con, table_name='clientes', paginated=True)
+        table.grid(row=0, column=1, rowspan=2, sticky='nswe')
+
+        # client form
+        client_form = ClientForm(master=self, con=self.con, table_name='clientes', pandas_table=table)
+        client_form.grid(row=0, column=0, sticky='nswe')
 
     def make_connection(self):
         """
@@ -113,7 +135,6 @@ class App(ctk.CTk):
             values = f"('{nome}', '{rg}', '{cpf}', '{endereco}', '{cidade}', '{estado}', '{pais}', '{cep}', '{nasc}', '{sexo}', '{celular}', '{email}', '{empresa}', '{cargo}', '{escolaridade}', '{profis}', '{defic}')"
             self.con.execute(f"INSERT INTO clientes (nome, rg, cpf, endereco, cidade, estado, pais, cep, nasc, sexo, celular, email, empresa, cargo, escolaridade, profis, defic) VALUES {values}")
             self.con.commit()
-
 
 
 
