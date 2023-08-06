@@ -103,6 +103,7 @@ class ClientForm(ttk.Labelframe):
         self.table_name = table_name
         self.pandas_table = pandas_table
         self.form_validation = Validate()
+        self.id = ttk.StringVar(value='')
         super().__init__(master=master, text='Cadastro de Clientes')
 
         # layout
@@ -202,9 +203,9 @@ class ClientForm(ttk.Labelframe):
 
         btn_cadastrar = ttk.Button(master=self, text='Cadastrar', command=self.add_to_database)
         btn_limpar_formulario = ttk.Button(master=self, text='Limpar', command=self.clear_form, bootstyle='warning')
-        btn_remover_clientes = ttk.Button(master=self, text='Deletar', command=lambda: print('Deletando Cliente...'), bootstyle='danger')
-        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=self.fill_form, bootstyle="primary-outline")
-
+        self.btn_remover_clientes = ttk.Button(master=self, text='Deletar', command=self.deletar, bootstyle='danger')
+        btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=self.editar_dados, bootstyle="primary-outline")
+        self.btn_savar_edicao = ttk.Button(master=self, text='Savar Edição', command=self.salvar_edicao, bootstyle='success', state='disabled')
         # validation
         
         self.form_validation.validate_text(widget=entry_nome, textvariable=self.var_nome, required=True)
@@ -269,10 +270,11 @@ class ClientForm(ttk.Labelframe):
         label_defic.grid(row=5, column=3, sticky='nswe')
         entry_defic.grid(row=5, column=4, columnspan=3, sticky='nswe', padx=5, pady=5)
 
-        btn_remover_clientes.grid(row=7, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
-        btn_limpar_formulario.grid(row=7, column=2, columnspan=2, sticky='nswe', padx=5, pady=5)
+        self.btn_remover_clientes.grid(row=6, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_limpar_formulario.grid(row=7, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_editar_clientes.grid(row=7, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_cadastrar.grid(row=7, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+        self.btn_savar_edicao.grid(row=6, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
         
     def add_to_database(self):
         """
@@ -285,7 +287,7 @@ class ClientForm(ttk.Labelframe):
             return
 
         # insert values into database
-        columns, data = self.get_form_data()
+        columns, data, _ = self.get_form_data()
         cursor = self.con.cursor()
         cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
         self.con.commit()
@@ -304,6 +306,7 @@ class ClientForm(ttk.Labelframe):
         """
         data = "("
         columns = "("
+        col_data = ""
         
         cursor = self.con.cursor()
         description = cursor.execute(f"SELECT * FROM {self.table_name}").description
@@ -311,13 +314,18 @@ class ClientForm(ttk.Labelframe):
         for var, desc in zip(self.vars, table_columns):
             data += f"'{var.get()}',"
             columns += f"{desc},"
+            col_data += f"{desc}='{var.get()}', "
         data = data[:-1] + ')'
         columns = columns[:-1] + ')'
+        col_data = col_data[:-2]
         print(columns)
         
-        return columns, data
+        return columns, data, col_data
         
     def clear_form(self):
+        self.btn_savar_edicao.configure(state='disabled')
+        self.btn_remover_clientes.configure(state='enabled')
+        self.id.set('')
         for var in self.vars:
             var.set(value='')
        
@@ -344,6 +352,63 @@ class ClientForm(ttk.Labelframe):
         for var , value, in zip(self.vars, rows[1:]): # discard id column
             var.set(value=value)
         
+        # update current id
+        self.id.set(rows[0])
+        
+    def editar_dados(self):
+        self.fill_form()
+        self.btn_savar_edicao.configure(state='enabled')
+        self.btn_remover_clientes.configure(state='disabled')
+
+    def salvar_edicao(self):
+        # check if form is valid and display toast notification
+        if not self.form_validation.check_validation():
+            toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+        
+        # updating data
+        _, _, col_data = self.get_form_data()
+        print(col_data)
+        self.con.execute(f"UPDATE {self.table_name} SET {col_data} WHERE client_id = {self.id.get()}")
+        self.con.commit()
+
+        # diplay toast notification
+        toast = ToastNotification(title="Success", message="Client data updated with success.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
+        toast.show_toast()
+
+        # update display
+        self.pandas_table.update_table()
+
+        # clear form data
+        self.clear_form()
+
+    def deletar(self):
+        # checks if pandas table is connected
+        if not isinstance(self.pandas_table, PandasTableView):
+            toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning')
+            toast.show_toast()
+            return
+        
+        # checks if user didn't select more than one row
+        rows = self.pandas_table.get_rows(selected=True)
+        if len(rows) > 1:
+            toast = ToastNotification(title="Error", message="Please select row at a time", bootstyle='danger')
+            toast.show_toast()
+            return
+        
+        # delete client
+        rows = rows[0].values
+        sected_id = rows[0]
+        self.con.execute(f"DELETE FROM {self.table_name} WHERE client_id = {sected_id}")
+        self.con.commit()
+
+        # diplay toast notification
+        toast = ToastNotification(title="Success", message="Client data deleted with success.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
+        toast.show_toast()
+
+        # update display
+        self.pandas_table.update_table()
 
 
 class MenuBar(ttk.Frame):
@@ -541,7 +606,7 @@ class Validate:
         
         def val(*args):
             if required and len(textvariable.get()) == 0:
-                widget.configure(bootstyle='danger')
+                widget.configure(bootstyle='default')
                 valid.set(False)
                 return False
             
@@ -726,12 +791,15 @@ class Validate:
         if len(self.all_valid) == 0:
             return True
         
+        all_filled = True
         for val, widget in self.all_required:
             text = str(widget.get())
             if len(text) == 0:
+                all_filled = False
                 widget.configure(bootstyle='warning')
                 val.set(False)
-                return False
+        if not all_filled:
+            return False
         
         for val in self.all_valid:
             if val.get() == False:
