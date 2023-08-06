@@ -35,7 +35,7 @@ class App(ctk.CTk):
         table.grid(row=1, column=1, rowspan=2, sticky='nswe')
 
         # client form
-        client_form = ClientForm(master=self, con=self.con, table_name='clientes', pandas_table=table)
+        client_form = ClientForm(master=self, con=self.con, table_name='clientes')
         client_form.grid(row=1, column=0, sticky='nswe')
 
         # run
@@ -48,7 +48,7 @@ class App(ctk.CTk):
             along with table 'clientes' and default columns
         """
         data_path = './HotelDatabase/'
-        filename = 'hoteldatabase'
+        filename = 'baseclientes.db'
         os.makedirs(data_path, exist_ok=True)
         con = sqlite3.connect(database=data_path + filename)
         con.execute("""

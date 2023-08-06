@@ -4,9 +4,9 @@ import numpy as np
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
-from ttkbootstrap.validation import validator, add_validation, ValidationEvent
+from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.toast import ToastNotification
-from ttkbootstrap.icons import Icon
+from ttkbootstrap.dialogs.dialogs import Messagebox
 import sqlite3
 import re
 
@@ -90,9 +90,6 @@ class PandasTableView(Tableview):
         rowdata = rowdata[self.headers].to_numpy().tolist()
         self.build_table_data(coldata=self.headers, rowdata=rowdata)
         self.autofit_columns()
-
-
-
 
 
 class ClientForm(ttk.Labelframe):
@@ -206,6 +203,17 @@ class ClientForm(ttk.Labelframe):
         self.btn_remover_clientes = ttk.Button(master=self, text='Deletar', command=self.deletar, bootstyle='danger')
         btn_editar_clientes = ttk.Button(master=self, text='Editar Dados', command=self.editar_dados, bootstyle="primary-outline")
         self.btn_savar_edicao = ttk.Button(master=self, text='Savar Edição', command=self.salvar_edicao, bootstyle='success', state='disabled')
+        
+        # tooltip
+        ToolTip(widget=btn_cadastrar, text='Adiciona cliente ao bando de dados.', bootstyle=('dark', 'inverse'))
+        ToolTip(widget=btn_editar_clientes, text='Preenche formulário com dados do cliente selecionado.', bootstyle=('dark', 'inverse'))
+        ToolTip(widget=self.btn_remover_clientes, text='Deleta cliente selecionado do bando de dados.', bootstyle=('danger', 'inverse'))
+        ToolTip(widget=self.btn_savar_edicao, text='Salva edição no bando de dados.', bootstyle=('success', 'inverse'))
+        ToolTip(widget=btn_limpar_formulario, text='Limpa dados do formulário ou cancela edição.', bootstyle=('warning', 'inverse'))
+
+        
+
+        
         # validation
         
         self.form_validation.validate_text(widget=entry_nome, textvariable=self.var_nome, required=True)
@@ -318,7 +326,6 @@ class ClientForm(ttk.Labelframe):
         data = data[:-1] + ')'
         columns = columns[:-1] + ')'
         col_data = col_data[:-2]
-        print(columns)
         
         return columns, data, col_data
         
@@ -334,16 +341,10 @@ class ClientForm(ttk.Labelframe):
             Fills all form data with selected row of pandas table view
         """
         
-        # checks if pandas table is connected
-        if not isinstance(self.pandas_table, PandasTableView):
-            toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning')
-            toast.show_toast()
-            return
-        
         # checks if user didn't select more than one row
         rows = self.pandas_table.get_rows(selected=True)
         if len(rows) > 1:
-            toast = ToastNotification(title="Error", message="Please select row at a time", bootstyle='danger')
+            toast = ToastNotification(title="Error", message="Please select one row at a time", bootstyle='danger', duration=3000, icon='', position=(0,0,'nw'))
             toast.show_toast()
             return
 
@@ -356,6 +357,12 @@ class ClientForm(ttk.Labelframe):
         self.id.set(rows[0])
         
     def editar_dados(self):
+        # checks if pandas table is connected
+        if not isinstance(self.pandas_table, PandasTableView):
+            toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning', duration=3000, icon='', position=(0,0,'nw'))
+            toast.show_toast()
+            return
+
         self.fill_form()
         self.btn_savar_edicao.configure(state='enabled')
         self.btn_remover_clientes.configure(state='disabled')
@@ -367,14 +374,20 @@ class ClientForm(ttk.Labelframe):
             toast.show_toast()
             return
         
+        # user confirmation input
+        ans = Messagebox().yesno(message=f"Confirm operation: \n update data from {self.table_name} ?", title='Confirm', bootstyle='warning', parent=self)
+        if not ans == 'Yes':
+            toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+        
         # updating data
         _, _, col_data = self.get_form_data()
-        print(col_data)
         self.con.execute(f"UPDATE {self.table_name} SET {col_data} WHERE client_id = {self.id.get()}")
         self.con.commit()
 
         # diplay toast notification
-        toast = ToastNotification(title="Success", message="Client data updated with success.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
+        toast = ToastNotification(title="Success", message="Data updated with success.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
         toast.show_toast()
 
         # update display
@@ -386,29 +399,38 @@ class ClientForm(ttk.Labelframe):
     def deletar(self):
         # checks if pandas table is connected
         if not isinstance(self.pandas_table, PandasTableView):
-            toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning')
+            toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning', position=(0,0,'nw'), duration=3000, icon='')
             toast.show_toast()
             return
         
         # checks if user didn't select more than one row
         rows = self.pandas_table.get_rows(selected=True)
         if len(rows) > 1:
-            toast = ToastNotification(title="Error", message="Please select row at a time", bootstyle='danger')
+            toast = ToastNotification(title="Error", message="Please select one row at a time", bootstyle='danger', position=(0,0,'nw'), duration=3000, icon='')
+            toast.show_toast()
+            return
+        
+        rows = rows[0].values
+        selected_id = rows[0]
+
+        # user confirmation input
+        ans = Messagebox().yesno(message=f"Confirm operation: \n Delete : {selected_id} from {self.table_name} ?", title='Confirm', bootstyle='warning', parent=self)
+        if not ans == 'Yes':
+            toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
             toast.show_toast()
             return
         
         # delete client
-        rows = rows[0].values
-        sected_id = rows[0]
-        self.con.execute(f"DELETE FROM {self.table_name} WHERE client_id = {sected_id}")
+        self.con.execute(f"DELETE FROM {self.table_name} WHERE client_id = {selected_id}")
         self.con.commit()
 
         # diplay toast notification
-        toast = ToastNotification(title="Success", message="Client data deleted with success.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
+        toast = ToastNotification(title="Success", message="Operation done with success.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
         toast.show_toast()
 
         # update display
         self.pandas_table.update_table()
+    
 
 
 class MenuBar(ttk.Frame):
