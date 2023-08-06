@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from MyWidgets import PandasTableView, ClientForm, MenuBar
-import pandas as pd
+import ttkbootstrap as ttk
 import sqlite3
 import os
 from random import choice, randint
@@ -16,8 +16,8 @@ class App(ctk.CTk):
 
         # layout
         self.rowconfigure(index=0, weight=1, uniform='a')
-        self.rowconfigure(index=(1,2), weight=8, uniform='a')
-        self.columnconfigure(index=(0,1), weight=1, uniform='a')
+        self.rowconfigure(index=1, weight=13, uniform='a')
+        self.columnconfigure(index=0, weight=1, uniform='a')
 
         # WIDGETS ->
 
@@ -25,18 +25,21 @@ class App(ctk.CTk):
         menu = MenuBar(master=self)
         menu.add_button(master=menu, text="File", command=lambda: print("File Button"))
         menu.add_button(master=menu, text="Settings", command=lambda: print("Settings Button"))
-        menu.grid(row=0, column=0, columnspan=2, sticky='nswe')
+        menu.grid(row=0, column=0, sticky='nswe')
+
+        tabs = ttk.Notebook(master=self)
+        tabs.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
 
         # self.make_sample_data() # add 100 sample records to database
 
         # searchfield
         
-        table = PandasTableView(master=self, con=self.con, table_name='clientes', paginated=True)
-        table.grid(row=1, column=1, rowspan=2, sticky='nswe')
+        # table = PandasTableView(master=self, con=self.con, table_name='clientes', paginated=True)
+        # table.grid(row=1, column=1, rowspan=2, sticky='nswe')
 
-        # client form
-        client_form = ClientForm(master=self, con=self.con, table_name='clientes')
-        client_form.grid(row=1, column=0, sticky='nswe')
+        # # client form
+        # client_form = ClientForm(master=self, con=self.con, table_name='clientes')
+        # client_form.grid(row=1, column=0, sticky='nswe')
 
         # run
         self.mainloop()
