@@ -1,7 +1,4 @@
-import CTkTable
 import pandas as pd
-import numpy as np
-import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.tooltip import ToolTip
@@ -11,47 +8,8 @@ import sqlite3
 import re
 
 # WIDGETS
-class Table(CTkTable.CTkTable):
-    """
-        A Table that inherits from CTkTable and can acccept data from
-        pandas.DataFrames and dicts on the format 
-        {"key1": [value1, value2, ...], "Key2": [valu3, value4, ...], ...}
-    """
-    def __init__(self, master, values, command=lambda event: event):
-        # initial setup
-        self.values = values
-        
-        self.values_to_list()
-        
-        super().__init__(
-            master=master,
-            values=self.values,
-            font=('Arial', 12, 'bold'),
-            hover=True,
-            hover_color="#1f1f1f",
-            header_color="#5f5f5f",
-            command=command,
-            corner_radius=0)
-    
-    def values_to_list(self):
-        """
-            Checks if the values input is pd.DataFrame or dict and parses to list
-        """
-        if isinstance(self.values, pd.DataFrame):
-            new_data = self.values.to_numpy().tolist()
-            new_data.insert(0, self.values.columns.values.tolist())
-            self.values = new_data
-        if isinstance(self.values, dict): 
-            header = list(self.values.keys())
-            new_data = []
-            for key in header:
-                new_data.append(self.values[key])
-            new_data = np.array(new_data).T.tolist()
-            new_data.insert(0, header)
-            self.values = new_data
 
-
-class PandasTableView(Tableview):
+class Integrated_Table_View(Tableview):
     def __init__(self,
             master,
             con: sqlite3.Connection,
@@ -81,7 +39,7 @@ class PandasTableView(Tableview):
             searchable=searchable,
             bootstyle=bootstyle,
             pagesize=100,
-            stripecolor=("#efefef", None)
+            stripecolor=(None, None)
         )
         self.autofit_columns()
     
@@ -92,13 +50,13 @@ class PandasTableView(Tableview):
         self.autofit_columns()
 
 
-class ClientForm(ttk.Labelframe):
+class Integrated_Form(ttk.Labelframe):
 
-    def __init__(self, master, con: sqlite3.Connection, table_name: str, pandas_table: PandasTableView=None):
+    def __init__(self, master, con: sqlite3.Connection, table_name: str, integrated_table: Integrated_Table_View=None):
         # initial setup
         self.con = con
         self.table_name = table_name
-        self.pandas_table = pandas_table
+        self.integrated_table = integrated_table
         self.form_validation = Validate()
         self.id = ttk.StringVar(value='')
         super().__init__(master=master, text='Cadastro de Clientes')
@@ -305,8 +263,8 @@ class ClientForm(ttk.Labelframe):
         toast.show_toast()
 
         # updates pandas table if there is pandas table connected
-        if isinstance(self.pandas_table, PandasTableView):
-            self.pandas_table.update_table()
+        if isinstance(self.integrated_table, Integrated_Table_View):
+            self.integrated_table.update_table()
 
     def get_form_data(self):
         """
@@ -342,7 +300,7 @@ class ClientForm(ttk.Labelframe):
         """
         
         # checks if user didn't select more than one row
-        rows = self.pandas_table.get_rows(selected=True)
+        rows = self.integrated_table.get_rows(selected=True)
         if len(rows) > 1:
             toast = ToastNotification(title="Error", message="Please select one row at a time", bootstyle='danger', duration=3000, icon='', position=(0,0,'nw'))
             toast.show_toast()
@@ -358,7 +316,7 @@ class ClientForm(ttk.Labelframe):
         
     def editar_dados(self):
         # checks if pandas table is connected
-        if not isinstance(self.pandas_table, PandasTableView):
+        if not isinstance(self.integrated_table, Integrated_Table_View):
             toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning', duration=3000, icon='', position=(0,0,'nw'))
             toast.show_toast()
             return
@@ -391,20 +349,20 @@ class ClientForm(ttk.Labelframe):
         toast.show_toast()
 
         # update display
-        self.pandas_table.update_table()
+        self.integrated_table.update_table()
 
         # clear form data
         self.clear_form()
 
     def deletar(self):
         # checks if pandas table is connected
-        if not isinstance(self.pandas_table, PandasTableView):
+        if not isinstance(self.integrated_table, Integrated_Table_View):
             toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning', position=(0,0,'nw'), duration=3000, icon='')
             toast.show_toast()
             return
         
         # checks if user didn't select more than one row
-        rows = self.pandas_table.get_rows(selected=True)
+        rows = self.integrated_table.get_rows(selected=True)
         if len(rows) > 1:
             toast = ToastNotification(title="Error", message="Please select one row at a time", bootstyle='danger', position=(0,0,'nw'), duration=3000, icon='')
             toast.show_toast()
@@ -429,9 +387,8 @@ class ClientForm(ttk.Labelframe):
         toast.show_toast()
 
         # update display
-        self.pandas_table.update_table()
+        self.integrated_table.update_table()
     
-
 
 class MenuBar(ttk.Frame):
     def __init__(self, master):

@@ -1,17 +1,15 @@
-import customtkinter as ctk
-from MyWidgets import PandasTableView, ClientForm, MenuBar
+from MyWidgets import Integrated_Table_View, Integrated_Form, MenuBar
 import ttkbootstrap as ttk
 import sqlite3
 import os
 from random import choice, randint
 
-class App(ctk.CTk):
+class App(ttk.Window):
     def __init__(self):
         # initial setup
-        super().__init__()
-        ctk.set_appearance_mode('light')
+        super().__init__(themename='solar')
         self.title('Sistema Hotel')
-        self.geometry('1280x720')
+        self.geometry('2000x2000')
 
         # Connect to databases
         self.con = self.make_connection()
@@ -38,7 +36,7 @@ class App(ctk.CTk):
         controle_clientes = Controle_Clientes(master=notebook, con=self.con, table_name='clientes')
         controle_clientes.pack(fill='both', expand=True)
 
-        controle_reservas = ctk.CTkFrame(master=notebook)
+        controle_reservas = Controle_Reservas(master=notebook, con=self.con, table_name='reservas')
         controle_reservas.pack(fill='both', expand=True)
 
         # adding to notebook
@@ -88,7 +86,7 @@ class App(ctk.CTk):
 
 
 
-class Controle_Clientes(ctk.CTkFrame):
+class Controle_Clientes(ttk.Frame):
     def __init__(self, master, con: sqlite3.Connection, table_name: str):
         # initial setup
         super().__init__(master=master)
@@ -102,12 +100,13 @@ class Controle_Clientes(ctk.CTkFrame):
         # self.make_sample_data() # add 100 sample records to database
 
         # pandas table
-        table = PandasTableView(master=self, con=self.con, table_name='clientes', paginated=True)
+        table = Integrated_Table_View(master=self, con=self.con, table_name='clientes', paginated=True)
         table.grid(row=0, column=1, rowspan=2, sticky='nswe')
 
         # client form
-        client_form = ClientForm(master=self, con=self.con, table_name='clientes', pandas_table=table)
+        client_form = Integrated_Form(master=self, con=self.con, table_name='clientes', integrated_table=table)
         client_form.grid(row=0, column=0, sticky='nswe')
+
 
     def make_sample_data(self):
         nomes = ['Fabio', 'Carlos', 'Ana', 'Felipe', 'Justilho', 'Caxias', 'Jacinto', 'Luan', 'Sergio', 'Luis', 'Janaina', 'Kleber']
@@ -145,6 +144,24 @@ class Controle_Clientes(ctk.CTkFrame):
             values = f"('{nome}', '{rg}', '{cpf}', '{endereco}', '{cidade}', '{estado}', '{pais}', '{cep}', '{nasc}', '{sexo}', '{celular}', '{email}', '{empresa}', '{cargo}', '{escolaridade}', '{profis}', '{defic}')"
             self.con.execute(f"INSERT INTO clientes (nome, rg, cpf, endereco, cidade, estado, pais, cep, nasc, sexo, celular, email, empresa, cargo, escolaridade, profis, defic) VALUES {values}")
             self.con.commit()
+
+
+class Controle_Reservas(ttk.Frame):
+    def __init__(self, master, con: sqlite3.Connection, table_name: str):
+        # initial setup
+        super().__init__(master=master)
+        self.con = con
+        self.table_name = table_name
+
+        # layout
+        self.rowconfigure(index=(0,1), weight=1, uniform='a')
+        self.columnconfigure(index=(0,1), weight=1, uniform='a')
+
+        # widgets
+        reservation_form = Integrated_Form(master=self, con=self.con, table_name='reservas')
+        reservation_form.grid(row=0, column=0, sticky='nswe')
+
+
 
 
 App()
