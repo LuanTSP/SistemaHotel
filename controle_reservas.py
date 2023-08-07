@@ -35,14 +35,42 @@ class Reservation_Form(Integrated_Form):
         )
 
         # layout
-        self.rowconfigure(index=(0,1,2,3,4,5), weight=1, uniform='a')
-        self.columnconfigure(index=(0,1,2,3,4,5), weight=1, uniform='a')
+        self.rowconfigure(index=(0,1,2,3,4,5,6,7), weight=1, uniform='a')
+        self.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
 
         # VARIABLES
         var_nome = ttk.StringVar(value='')
+        var_cpf = ttk.StringVar(value='')
+        var_nasc = ttk.StringVar(value='')
+        var_celular = ttk.StringVar(value='')
+        var_email = ttk.StringVar(value='')
+        var_empresa = ttk.StringVar(value='')
+        var_dtinicio = ttk.StringVar(value='')
+        var_dtfinal = ttk.StringVar(value='')
+        var_diareserva = ttk.StringVar(value='')
+        var_qthospede = ttk.StringVar(value='')
+        var_numapto = ttk.StringVar(value='')
+        var_nomeacp1 = ttk.StringVar(value='')
+        var_nomeacp2 = ttk.StringVar(value='')
+        var_nomeacp3 = ttk.StringVar(value='')
+        var_nomeacp4 = ttk.StringVar(value='')
 
         self.vars = [
             var_nome,
+            var_cpf,
+            var_nasc,
+            var_celular,
+            var_email,
+            var_empresa,
+            var_dtinicio,
+            var_dtfinal,
+            var_diareserva,
+            var_qthospede,
+            var_numapto,
+            var_nomeacp1,
+            var_nomeacp2,
+            var_nomeacp3,
+            var_nomeacp4,
         ]
 
         # WIDGETS
@@ -51,6 +79,47 @@ class Reservation_Form(Integrated_Form):
         label_nome = ttk.Label(master=self, text='NOME')
         entry_nome = ttk.Entry(master=self, textvariable=var_nome)
 
+        label_cpf = ttk.Label(master=self, text='CPF')
+        entry_cpf = ttk.Entry(master=self, textvariable=var_cpf)
+
+        label_nasc = ttk.Label(master=self, text='NASC')
+        entry_nasc = ttk.Entry(master=self, textvariable=var_nasc)
+
+        label_celular = ttk.Label(master=self, text='CELULAR')
+        entry_celular = ttk.Entry(master=self, textvariable=var_celular)
+
+        label_email = ttk.Label(master=self, text='E-MAIL')
+        entry_email = ttk.Entry(master=self, textvariable=var_email)
+
+        label_empresa = ttk.Label(master=self, text='EMPRESA')
+        entry_empresa = ttk.Entry(master=self, textvariable=var_empresa)
+
+        label_dtinicio = ttk.Label(master=self, text="DtINÍCIO")
+        entry_dtinicio = ttk.Entry(master=self, textvariable=var_dtinicio)
+
+        label_dtfinal = ttk.Label(master=self, text='DtFINAL')
+        entry_dtfinal = ttk.Entry(master=self, textvariable=var_dtfinal)
+
+        label_diareserva = ttk.Label(master=self, text='DIA RESERVA')
+        entry_diareserva = ttk.Entry(master=self, textvariable=var_diareserva)
+
+        label_qthospede = ttk.Label(master=self, text='Qtd. Hospedes')
+        entry_qthospede = ttk.Entry(master=self, textvariable=var_qthospede)
+
+        label_numapto = ttk.Label(master=self, text='NUM. APTO')
+        entry_numapto = ttk.Entry(master=self, textvariable=var_numapto)
+
+        label_nomeacp1 = ttk.Label(master=self, text='NOME ACP-1')
+        entry_nomeacp1 = ttk.Entry(master=self, textvariable=var_nomeacp1)
+
+        label_nomeacp2 = ttk.Label(master=self, text='NOME ACP-2')
+        entry_nomeacp2 = ttk.Entry(master=self, textvariable=var_nomeacp2)
+
+        label_nomeacp3 = ttk.Label(master=self, text='NOME ACP-3')
+        entry_nomeacp3 = ttk.Entry(master=self, textvariable=var_nomeacp3)
+
+        label_nomeacp4 = ttk.Label(master=self, text='NOME ACP-4')
+        entry_nomeacp4 = ttk.Entry(master=self, textvariable=var_nomeacp4)
 
 
         btn_register = self.register_button(master=self)
@@ -61,11 +130,43 @@ class Reservation_Form(Integrated_Form):
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
-        entry_nome.grid(row=0, column=1, columnspan=2, sticky='nswe')
+        entry_nome.grid(row=0, column=1, columnspan=6, sticky='nswe', padx=5, pady=5)
 
-        btn_register.grid(row=0, column=5, sticky='nswe', padx=5, pady=5)
-        btn_edit.grid(row=1, column=5, sticky='nswe', padx=5, pady=5)
-        btn_save_edit.grid(row=2, column=5, sticky='nswe', padx=5, pady=5)
-        btn_clear_form.grid(row=3, column=5, sticky='nswe', padx=5, pady=5)
-        btn_delete.grid(row=4, column=5, sticky='nswe', padx=5, pady=5)
+        label_cpf.grid(row=0, column=7, sticky='nswe')
+        entry_cpf.grid(row=0, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_nasc.grid(row=1, column=0, sticky='nswe')
+        entry_nasc.grid(row=1, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_celular.grid(row=1, column=3, sticky='nswe')
+        entry_celular.grid(row=1, column=4, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_email.grid(row=1, column=6, sticky='nswe')
+        entry_email.grid(row=1, column=7, columnspan=3, sticky='nswe', padx=5, pady=5)
+
+        label_empresa.grid(row=2, column=0, sticky='nswe')
+        entry_empresa.grid(row=2, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_dtinicio.grid(row=2, column=3, sticky='nswe')
+        entry_dtinicio.grid(row=2, column=4, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_dtfinal.grid(row=2, column=6, sticky='nswe')
+        entry_dtfinal.grid(row=2, column=7, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_diareserva.grid(row=3, column=0, sticky='nswe')
+        entry_diareserva.grid(row=3, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_qthospede.grid(row=3, column=3, sticky='nswe')
+        entry_qthospede.grid(row=3, column=4, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+        label_numapto.grid(row=3, column=6, sticky='nswe')
+        entry_numapto.grid(row=3, column=7, columnspan=2, sticky='nswe', padx=5, pady=5)
+
+
+
+        btn_register.grid(row=7, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_edit.grid(row=7, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_save_edit.grid(row=6, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_clear_form.grid(row=7, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_delete.grid(row=6, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
         
