@@ -3,7 +3,6 @@ from controle_clientes import Controle_Clientes
 import ttkbootstrap as ttk
 import sqlite3
 import os
-from random import choice, randint
 
 class App(ttk.Window):
     def __init__(self):
@@ -21,7 +20,7 @@ class App(ttk.Window):
         self.rowconfigure(index=1, weight=13, uniform='a')
         self.columnconfigure(index=0, weight=1, uniform='a')
 
-        # WIDGETS ->
+        # WIDGETS
 
         # menu bar
         menu = MenuBar(master=self)
@@ -49,8 +48,8 @@ class App(ttk.Window):
             if database does not exist, creates it
             along with table 'clientes' and default columns
         """
-        data_path = './HotelDatabase/'
-        filename = 'baseclientes.db'
+        data_path = './Database/'
+        filename = 'base.db'
         os.makedirs(data_path, exist_ok=True)
         con = sqlite3.connect(database=data_path + filename)
         
