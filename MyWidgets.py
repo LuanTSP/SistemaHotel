@@ -62,8 +62,7 @@ class Integrated_Form(ttk.Labelframe):
         super().__init__(master=master, text=text)
 
         # layout
-        self.rowconfigure(index=(0,1,2,3,4,5), weight=1, uniform='a')
-        self.rowconfigure(index=6, weight=3, uniform='a')
+        self.rowconfigure(index=(0,1,2,3,4,5,6,7), weight=1, uniform='a')
         self.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
         
         # varibles
@@ -157,7 +156,11 @@ class Integrated_Form(ttk.Labelframe):
         label_defic = ttk.Label(master=self, text='DEFIC.')
         entry_defic = ttk.Entry(master=self, textvariable=self.var_defic)
 
-        form_controls = self.form_controls()
+        btn_register = self.register_button(master=self)
+        btn_edit = self.edit_button(master=self)
+        btn_save_edit =  self.save_edit_button(master=self)
+        btn_clear_form = self.clear_form_button(master=self)
+        btn_delete = self.delete_button(master=self)
         
         # validation
         
@@ -223,7 +226,11 @@ class Integrated_Form(ttk.Labelframe):
         label_defic.grid(row=5, column=3, sticky='nswe')
         entry_defic.grid(row=5, column=4, columnspan=3, sticky='nswe', padx=5, pady=5)
 
-        form_controls.grid(row=6, column=0, columnspan=10, sticky='nswe')
+        btn_register.grid(row=7, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_edit.grid(row=7, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_save_edit.grid(row=6, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_clear_form.grid(row=7, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_delete.grid(row=6, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
 
         
     def add_to_database(self):
@@ -272,8 +279,10 @@ class Integrated_Form(ttk.Labelframe):
         return columns, data, col_data
         
     def clear_form(self):
-        self.btn_savar_edicao.configure(state='disabled')
-        self.btn_remover_clientes.configure(state='enabled')
+        # enable disable
+        self.btn_save_edit.configure(state='disabled')
+        self.btn_delete.configure(state='enabled')
+        
         self.id.set('')
         for var in self.vars:
             var.set(value='')
@@ -298,7 +307,7 @@ class Integrated_Form(ttk.Labelframe):
         # update current id
         self.id.set(rows[0])
         
-    def editar_dados(self):
+    def edit_data(self):
         # checks if pandas table is connected
         if not isinstance(self.integrated_table, Integrated_Table_View):
             toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning', duration=3000, icon='', position=(0,0,'nw'))
@@ -306,10 +315,12 @@ class Integrated_Form(ttk.Labelframe):
             return
 
         self.fill_form()
-        self.btn_savar_edicao.configure(state='enabled')
-        self.btn_remover_clientes.configure(state='disabled')
 
-    def salvar_edicao(self):
+        # anable disable
+        self.btn_save_edit.configure(state='enabled')
+        self.btn_delete.configure(state='disabled')
+
+    def save_edit(self):
         # check if form is valid and display toast notification
         if not self.form_validation.check_validation():
             toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
@@ -338,7 +349,7 @@ class Integrated_Form(ttk.Labelframe):
         # clear form data
         self.clear_form()
 
-    def deletar(self):
+    def delete_from_database(self):
         # checks if pandas table is connected
         if not isinstance(self.integrated_table, Integrated_Table_View):
             toast = ToastNotification(title="Warning", message="Please connect to a Pandas Table", bootstyle='warning', position=(0,0,'nw'), duration=3000, icon='')
@@ -372,38 +383,36 @@ class Integrated_Form(ttk.Labelframe):
 
         # update display
         self.integrated_table.update_table()
+        
+    def register_button(self, master):
+        btn_register = ttk.Button(master=master, text='Register', command=self.add_to_database)
+        ToolTip(widget=btn_register, text='Add data to database.', bootstyle=('dark', 'inverse'))
+
+        return btn_register
     
-    def form_controls(self):
-        frame = ttk.Labelframe(master=self, text='Controls')
-        
-        # layout
-        frame.rowconfigure(index=(0,1), weight=1, uniform='a')
-        frame.columnconfigure(index=(0,1,2,3,4), weight=1, uniform='a')
+    def delete_button(self, master):
+        self.btn_delete = ttk.Button(master=master, text='Delete', command=self.delete_from_database, bootstyle='danger')
+        ToolTip(widget=self.btn_delete, text='Delete selected form database.', bootstyle=('danger', 'inverse'))
 
-        # buttons
-        btn_cadastrar = ttk.Button(master=frame, text='Cadastrar', command=self.add_to_database)
-        btn_limpar_formulario = ttk.Button(master=frame, text='Limpar', command=self.clear_form, bootstyle='warning')
-        self.btn_remover_clientes = ttk.Button(master=frame, text='Deletar', command=self.deletar, bootstyle='danger')
-        btn_editar_clientes = ttk.Button(master=frame, text='Editar Dados', command=self.editar_dados, bootstyle="primary-outline")
-        self.btn_savar_edicao = ttk.Button(master=frame, text='Savar Edição', command=self.salvar_edicao, bootstyle='success', state='disabled')
+        return self.btn_delete
+    
+    def save_edit_button(self, master):
+        self.btn_save_edit = ttk.Button(master=master, text='Save Edit', command=self.save_edit, bootstyle='success', state='disabled')
+        ToolTip(widget=self.btn_save_edit, text='Saves edit to database.', bootstyle=('success', 'inverse'))
 
-        # place buttons
-        self.btn_remover_clientes.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
-        btn_limpar_formulario.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
-        btn_editar_clientes.grid(row=1, column=3, sticky='nswe', padx=5, pady=5)
-        btn_cadastrar.grid(row=1, column=4, sticky='nswe', padx=5, pady=5)
-        self.btn_savar_edicao.grid(row=0, column=3, sticky='nswe', padx=5, pady=5)
-        
-        # tooltip
-        ToolTip(widget=btn_cadastrar, text='Adiciona cliente ao bando de dados.', bootstyle=('dark', 'inverse'))
-        ToolTip(widget=btn_editar_clientes, text='Preenche formulário com dados do cliente selecionado.', bootstyle=('dark', 'inverse'))
-        ToolTip(widget=self.btn_remover_clientes, text='Deleta cliente selecionado do bando de dados.', bootstyle=('danger', 'inverse'))
-        ToolTip(widget=self.btn_savar_edicao, text='Salva edição no bando de dados.', bootstyle=('success', 'inverse'))
-        ToolTip(widget=btn_limpar_formulario, text='Limpa dados do formulário ou cancela edição.', bootstyle=('warning', 'inverse'))
+        return self.btn_save_edit
+    
+    def edit_button(self, master):
+        btn_edit = ttk.Button(master=master, text='Edit', command=self.edit_data, bootstyle="primary-outline")
+        ToolTip(widget=btn_edit, text='Fills form with selected data.', bootstyle=('dark', 'inverse'))
 
-        return frame
-        
+        return btn_edit
+    
+    def clear_form_button(self, master):
+        btn_clear_form = ttk.Button(master=master, text='Clear', command=self.clear_form, bootstyle='warning')
+        ToolTip(widget=btn_clear_form, text='Reset form of cancel edit.', bootstyle=('warning', 'inverse'))
 
+        return btn_clear_form
 
 
 
