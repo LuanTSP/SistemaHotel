@@ -19,7 +19,7 @@ class Controle_Clientes(ttk.Frame):
         # self.make_sample_data() # add 100 sample records to database
 
         # integrated table
-        table = Integrated_Table_View(master=self, con=self.con, table_name='clientes', paginated=True, headers=['client_id', 'nome', 'rg', 'cpf'])
+        table = Integrated_Table_View(master=self, con=self.con, table_name='clientes', paginated=True)
         table.grid(row=0, column=1, rowspan=2, sticky='nswe')
 
         # client form
