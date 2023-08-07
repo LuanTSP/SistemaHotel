@@ -10,6 +10,7 @@ import re
 # WIDGETS
 
 class Integrated_Table_View(Tableview):
+
     def __init__(self,
             master,
             con: sqlite3.Connection,
@@ -60,8 +61,7 @@ class Integrated_Form(ttk.Labelframe):
         self.form_validation = Validate()
         self.id = ttk.StringVar(value='')
         super().__init__(master=master, text=text)
-
-        
+  
     def add_to_database(self):
         """
             Add form data to the database

@@ -5,6 +5,7 @@ import sqlite3
 import os
 
 class App(ttk.Window):
+    
     def __init__(self):
         # initial setup
         super().__init__(themename='solar')

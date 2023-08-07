@@ -5,6 +5,7 @@ import ttkbootstrap as ttk
 
 
 class Controle_Clientes(ttk.Frame):
+
     def __init__(self, master, con: sqlite3.Connection, table_name: str):
         # initial setup
         super().__init__(master=master)
@@ -24,7 +25,6 @@ class Controle_Clientes(ttk.Frame):
         # client form
         client_form = Client_Form(master=self, con=self.con, table_name=self.table_name, integrate_table=table, text='Client Form')
         client_form.grid(row=0, column=0, sticky='nswe')
-
 
     def make_sample_data(self):
 
@@ -66,6 +66,7 @@ class Controle_Clientes(ttk.Frame):
 
 
 class Client_Form(Integrated_Form):
+
     def __init__(self, master, con: sqlite3.Connection, table_name: str, integrate_table: Integrated_Table_View, text='Table'):
         super().__init__(
             master=master,
