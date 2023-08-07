@@ -1,5 +1,6 @@
 from MyWidgets import MenuBar
 from controle_clientes import Controle_Clientes
+from controle_reservas import Controle_Reservas
 import ttkbootstrap as ttk
 import sqlite3
 import os
@@ -37,8 +38,12 @@ class App(ttk.Window):
         controle_clientes = Controle_Clientes(master=notebook, con=self.con, table_name='clientes')
         controle_clientes.pack(fill='both', expand=True)
 
+        controle_reservas = Controle_Reservas(master=notebook, con=self.con, table_name='reservas')
+        controle_reservas.pack(fill='both', expand=True)
+
         # adding to notebook
         notebook.add(child=controle_clientes, text='Clientes')
+        notebook.add(child=controle_reservas, text='Reservas')
 
         # run
         self.mainloop()
@@ -78,7 +83,17 @@ class App(ttk.Window):
             """)
         
         # create table reservas
-        # ... TO DO
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS reservas
+            (reservation_id INTEGER PRIMARY KEY,
+            nome TEXT,
+            quarto TEXT,
+            diaria TEXT,
+            data TEXT,
+            estadia TEXT,
+            acompanhantes TEXT)
+        """)
+
         return con
 
 

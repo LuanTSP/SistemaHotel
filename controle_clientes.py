@@ -18,8 +18,8 @@ class Controle_Clientes(ttk.Frame):
 
         # self.make_sample_data() # add 100 sample records to database
 
-        # pandas table
-        table = Integrated_Table_View(master=self, con=self.con, table_name='clientes', paginated=True)
+        # integrated table
+        table = Integrated_Table_View(master=self, con=self.con, table_name='clientes', paginated=True, headers=['client_id', 'nome', 'rg', 'cpf'])
         table.grid(row=0, column=1, rowspan=2, sticky='nswe')
 
         # client form
@@ -80,7 +80,7 @@ class Client_Form(Integrated_Form):
         self.rowconfigure(index=(0,1,2,3,4,5,6,7), weight=1, uniform='a')
         self.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
         
-        # variables
+        # VARIABLES
         self.var_nome = ttk.StringVar(value='')
         self.var_rg = ttk.StringVar(value='')
         self.var_cpf = ttk.StringVar(value='')
@@ -118,6 +118,8 @@ class Client_Form(Integrated_Form):
             self.var_profis,
             self.var_defic,
         ]
+
+        # WIDGETS
 
         # create widgets
         label_nome = ttk.Label(master=self, text='NOME')

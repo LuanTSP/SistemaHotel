@@ -18,7 +18,6 @@ class Integrated_Table_View(Tableview):
             paginated=False,
             searchable=True,
             headers:list=[],
-            bootstyle='litera',
         ):
         self.con = con
         self.table_name = table_name
@@ -38,7 +37,6 @@ class Integrated_Table_View(Tableview):
             coldata=self.headers,
             paginated=paginated,
             searchable=searchable,
-            bootstyle=bootstyle,
             pagesize=100,
             stripecolor=(None, None)
         )
@@ -60,6 +58,7 @@ class Integrated_Form(ttk.Labelframe):
         self.integrated_table = integrated_table
         self.form_validation = Validate()
         self.id = ttk.StringVar(value='')
+        self.vars = []
         super().__init__(master=master, text=text)
   
     def add_to_database(self):
@@ -97,10 +96,15 @@ class Integrated_Form(ttk.Labelframe):
         cursor = self.con.cursor()
         description = cursor.execute(f"SELECT * FROM {self.table_name}").description
         table_columns = list(map(lambda x: x[0], description))[1:] # discard id to be added automaticaly by sqlite3
-        for var, desc in zip(self.vars, table_columns):
-            data += f"'{var.get()}',"
-            columns += f"{desc},"
-            col_data += f"{desc}='{var.get()}', "
+        for i in range(len(table_columns)):
+            # Try access data
+            try:
+                data += f"'{self.vars[i].get()}',"
+                col_data += f"{table_columns[i]}='{self.vars[i].get()}', "
+            except:
+                data += "' ',"
+            
+            columns += f"{table_columns[i]},"
         data = data[:-1] + ')'
         columns = columns[:-1] + ')'
         col_data = col_data[:-2]
@@ -165,7 +169,7 @@ class Integrated_Form(ttk.Labelframe):
         
         # updating data
         _, _, col_data = self.get_form_data()
-        self.con.execute(f"UPDATE {self.table_name} SET {col_data} WHERE client_id = {self.id.get()}")
+        self.con.execute(f"UPDATE {self.table_name} SET {col_data} WHERE rowid = {self.id.get()}")
         self.con.commit()
 
         # diplay toast notification
@@ -203,7 +207,7 @@ class Integrated_Form(ttk.Labelframe):
             return
         
         # delete client
-        self.con.execute(f"DELETE FROM {self.table_name} WHERE client_id = {selected_id}")
+        self.con.execute(f"DELETE FROM {self.table_name} WHERE rowid = {selected_id}")
         self.con.commit()
 
         # diplay toast notification
