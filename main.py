@@ -37,9 +37,13 @@ class App(ttk.Window):
         # Systems
         controle_clientes = Controle_Clientes(master=notebook, con=self.con, table_name='clientes')
         controle_clientes.pack(fill='both', expand=True)
-
+        
         controle_reservas = Controle_Reservas(master=notebook, con=self.con, table_name='reservas')
         controle_reservas.pack(fill='both', expand=True)
+        
+        # linking forms
+        controle_clientes.client_form.link(integrated_form=controle_reservas.reservation_form)
+        
 
         # adding to notebook
         notebook.add(child=controle_clientes, text='Clientes')

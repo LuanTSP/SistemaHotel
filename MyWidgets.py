@@ -59,6 +59,7 @@ class Integrated_Form(ttk.Labelframe):
         self.form_validation = Validate()
         self.id = ttk.StringVar(value='')
         self.vars = []
+        self.linked_form = []
         super().__init__(master=master, text=text)
   
     def add_to_database(self):
@@ -256,6 +257,9 @@ class Integrated_Form(ttk.Labelframe):
         ToolTip(widget=btn_clear_form, text='Reset form of cancel edit.', bootstyle=('warning', 'inverse'))
 
         return btn_clear_form
+
+    def link(self, integrated_form):
+        self.linked_form = integrated_form.vars
 
 
 

@@ -1,6 +1,7 @@
 import sqlite3
 from MyWidgets import Integrated_Form, Integrated_Table_View
 from random import choice, randint
+from ttkbootstrap.toast import ToastNotification
 import ttkbootstrap as ttk
 
 
@@ -23,8 +24,8 @@ class Controle_Clientes(ttk.Frame):
         table.grid(row=0, column=1, rowspan=2, sticky='nswe')
 
         # client form
-        client_form = Client_Form(master=self, con=self.con, table_name=self.table_name, integrate_table=table, text='Client Form')
-        client_form.grid(row=0, column=0, sticky='nswe')
+        self.client_form = Client_Form(master=self, con=self.con, table_name=self.table_name, integrate_table=table, text='Client Form')
+        self.client_form.grid(row=0, column=0, sticky='nswe')
 
     def make_sample_data(self):
 
@@ -178,6 +179,7 @@ class Client_Form(Integrated_Form):
         btn_save_edit =  self.save_edit_button(master=self)
         btn_clear_form = self.clear_form_button(master=self)
         btn_delete = self.delete_button(master=self)
+        btn_reservation = self.btn_reservation(master=self)
         
         # validation
         
@@ -248,4 +250,28 @@ class Client_Form(Integrated_Form):
         btn_save_edit.grid(row=6, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_clear_form.grid(row=7, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_delete.grid(row=6, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_reservation.grid(row=7, column=4, columnspan=2, sticky='nswe', padx=5, pady=5)
+    
+    def btn_reservation(self, master):
+
+        def func():
+            # checks if user didn't select more than one row
+            rows = self.integrated_table.get_rows(selected=True)
+            if len(rows) > 1:
+                toast = ToastNotification(title="Error", message="Please select one row at a time", bootstyle='danger', duration=3000, icon='', position=(0,0,'nw'))
+                toast.show_toast()
+                return
+            
+            # getting data
+            row_data = rows[0].values
+            # set values to reservation 
+            self.linked_form[0].set(row_data[1]) # set nome
+            self.linked_form[1].set(row_data[3]) # set cpf
+            self.linked_form[2].set(row_data[9]) # set nasc
+            self.linked_form[3].set(row_data[11]) # set celular
+            self.linked_form[4].set(row_data[12]) # set email
+            self.linked_form[5].set(row_data[13]) # set empresa
+
+        btn = ttk.Button(master=master, text='Reservation', bootstyle='warning', command=func)
+        return btn
 

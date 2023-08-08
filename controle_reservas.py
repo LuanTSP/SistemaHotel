@@ -20,8 +20,8 @@ class Controle_Reservas(ttk.Frame):
         table.grid(row=0, column=0, rowspan=2, sticky='nswe')
 
         # reservation form
-        reservation_form = Reservation_Form(master=self, con=self.con, table_name='reservas', integrated_table=table, text='Reservation Form')
-        reservation_form.grid(row=0, column=1, rowspan=2, sticky='nswe')
+        self.reservation_form = Reservation_Form(master=self, con=self.con, table_name='reservas', integrated_table=table, text='Reservation Form')
+        self.reservation_form.grid(row=0, column=1, rowspan=2, sticky='nswe')
 
 
 class Reservation_Form(Integrated_Form):
