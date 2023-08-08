@@ -87,11 +87,24 @@ class App(ttk.Window):
             CREATE TABLE IF NOT EXISTS reservas
             (reservation_id INTEGER PRIMARY KEY,
             nome TEXT,
-            quarto TEXT,
-            diaria TEXT,
-            data TEXT,
-            estadia TEXT,
-            acompanhantes TEXT)
+            cpf TEXT,
+            nasc TEXT,
+            celular TEXT,
+            email TEXT,
+            empresa TEXT,
+            dtinicio TEXT,
+            dtfinal TEXT,
+            diareserva TEXT,
+            qthospede TEXT,
+            numapto TEXT,
+            nomeacp1 TEXT,
+            rgacp1 TEXT,
+            nomeacp2 TEXT,
+            rgacp2 TEXT,
+            nomeacp3 TEXT,
+            rgacp3 TEXT,
+            nomeacp4 TEXT,
+            rgacp4 TEXT)
         """)
 
         return con

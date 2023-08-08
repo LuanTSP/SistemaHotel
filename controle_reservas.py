@@ -21,7 +21,7 @@ class Controle_Reservas(ttk.Frame):
 
         # reservation form
         reservation_form = Reservation_Form(master=self, con=self.con, table_name='reservas', integrated_table=table, text='Reservation Form')
-        reservation_form.grid(row=0, column=1, sticky='nswe')
+        reservation_form.grid(row=0, column=1, rowspan=2, sticky='nswe')
 
 
 class Reservation_Form(Integrated_Form):
@@ -35,8 +35,21 @@ class Reservation_Form(Integrated_Form):
         )
 
         # layout
-        self.rowconfigure(index=(0,1,2,3,4,5,6,7), weight=1, uniform='a')
-        self.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
+        self.rowconfigure(index=0, weight=2, uniform='a')
+        self.rowconfigure(index=1, weight=5, uniform='a')
+        self.columnconfigure(index=0, weight=1, uniform='a')
+
+        top_frame = ttk.Labelframe(master=self, text='Dados Reserva')
+        down_frame = ttk.LabelFrame(master=self, text='Dados Acompanhantes')
+
+        top_frame.rowconfigure(index=(0,1,2,3), weight=1, uniform='a')
+        top_frame.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
+
+        down_frame.rowconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
+        down_frame.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
+
+        top_frame.grid(row=0, column=0, sticky='nswe')
+        down_frame.grid(row=1, column=0, sticky='nswe')
 
         # VARIABLES
         var_nome = ttk.StringVar(value='')
@@ -51,9 +64,13 @@ class Reservation_Form(Integrated_Form):
         var_qthospede = ttk.StringVar(value='')
         var_numapto = ttk.StringVar(value='')
         var_nomeacp1 = ttk.StringVar(value='')
+        var_rgacp1 = ttk.StringVar(value='')
         var_nomeacp2 = ttk.StringVar(value='')
+        var_rgacp2 = ttk.StringVar(value='')
         var_nomeacp3 = ttk.StringVar(value='')
+        var_rgacp3 = ttk.StringVar(value='')
         var_nomeacp4 = ttk.StringVar(value='')
+        var_rgacp4 = ttk.StringVar(value='')
 
         self.vars = [
             var_nome,
@@ -68,65 +85,82 @@ class Reservation_Form(Integrated_Form):
             var_qthospede,
             var_numapto,
             var_nomeacp1,
+            var_rgacp1,
             var_nomeacp2,
+            var_rgacp2,
             var_nomeacp3,
+            var_rgacp3,
             var_nomeacp4,
+            var_rgacp4,
         ]
 
         # WIDGETS
         
         # create widgets
-        label_nome = ttk.Label(master=self, text='NOME')
-        entry_nome = ttk.Entry(master=self, textvariable=var_nome)
 
-        label_cpf = ttk.Label(master=self, text='CPF')
-        entry_cpf = ttk.Entry(master=self, textvariable=var_cpf)
+        label_nome = ttk.Label(master=top_frame, text='NOME')
+        entry_nome = ttk.Entry(master=top_frame, textvariable=var_nome)
 
-        label_nasc = ttk.Label(master=self, text='NASC')
-        entry_nasc = ttk.Entry(master=self, textvariable=var_nasc)
+        label_cpf = ttk.Label(master=top_frame, text='CPF')
+        entry_cpf = ttk.Entry(master=top_frame, textvariable=var_cpf)
 
-        label_celular = ttk.Label(master=self, text='CELULAR')
-        entry_celular = ttk.Entry(master=self, textvariable=var_celular)
+        label_nasc = ttk.Label(master=top_frame, text='NASC')
+        entry_nasc = ttk.Entry(master=top_frame, textvariable=var_nasc)
 
-        label_email = ttk.Label(master=self, text='E-MAIL')
-        entry_email = ttk.Entry(master=self, textvariable=var_email)
+        label_celular = ttk.Label(master=top_frame, text='CELULAR')
+        entry_celular = ttk.Entry(master=top_frame, textvariable=var_celular)
 
-        label_empresa = ttk.Label(master=self, text='EMPRESA')
-        entry_empresa = ttk.Entry(master=self, textvariable=var_empresa)
+        label_email = ttk.Label(master=top_frame, text='E-MAIL')
+        entry_email = ttk.Entry(master=top_frame, textvariable=var_email)
 
-        label_dtinicio = ttk.Label(master=self, text="DtINÍCIO")
-        entry_dtinicio = ttk.Entry(master=self, textvariable=var_dtinicio)
+        label_empresa = ttk.Label(master=top_frame, text='EMPRESA')
+        entry_empresa = ttk.Entry(master=top_frame, textvariable=var_empresa)
 
-        label_dtfinal = ttk.Label(master=self, text='DtFINAL')
-        entry_dtfinal = ttk.Entry(master=self, textvariable=var_dtfinal)
+        label_dtinicio = ttk.Label(master=top_frame, text="DtINÍCIO")
+        entry_dtinicio = ttk.Entry(master=top_frame, textvariable=var_dtinicio)
 
-        label_diareserva = ttk.Label(master=self, text='DIA RESERVA')
-        entry_diareserva = ttk.Entry(master=self, textvariable=var_diareserva)
+        label_dtfinal = ttk.Label(master=top_frame, text='DtFINAL')
+        entry_dtfinal = ttk.Entry(master=top_frame, textvariable=var_dtfinal)
 
-        label_qthospede = ttk.Label(master=self, text='Qtd. Hospedes')
-        entry_qthospede = ttk.Entry(master=self, textvariable=var_qthospede)
+        label_diareserva = ttk.Label(master=top_frame, text='DIA RESERVA')
+        entry_diareserva = ttk.Entry(master=top_frame, textvariable=var_diareserva)
 
-        label_numapto = ttk.Label(master=self, text='NUM. APTO')
-        entry_numapto = ttk.Entry(master=self, textvariable=var_numapto)
+        label_qthospede = ttk.Label(master=top_frame, text='Qtd. Hospedes')
+        entry_qthospede = ttk.Entry(master=top_frame, textvariable=var_qthospede)
 
-        label_nomeacp1 = ttk.Label(master=self, text='NOME ACP-1')
-        entry_nomeacp1 = ttk.Entry(master=self, textvariable=var_nomeacp1)
+        label_numapto = ttk.Label(master=top_frame, text='NUM. APTO')
+        entry_numapto = ttk.Entry(master=top_frame, textvariable=var_numapto)
 
-        label_nomeacp2 = ttk.Label(master=self, text='NOME ACP-2')
-        entry_nomeacp2 = ttk.Entry(master=self, textvariable=var_nomeacp2)
+        label_nomeacp1 = ttk.Label(master=down_frame, text='NOME ACP-1')
+        entry_nomeacp1 = ttk.Entry(master=down_frame, textvariable=var_nomeacp1)
 
-        label_nomeacp3 = ttk.Label(master=self, text='NOME ACP-3')
-        entry_nomeacp3 = ttk.Entry(master=self, textvariable=var_nomeacp3)
+        label_rgacp1 = ttk.Label(master=down_frame, text='RG')
+        entry_rgacp1 = ttk.Entry(master=down_frame, textvariable=var_rgacp1)
 
-        label_nomeacp4 = ttk.Label(master=self, text='NOME ACP-4')
-        entry_nomeacp4 = ttk.Entry(master=self, textvariable=var_nomeacp4)
+        label_nomeacp2 = ttk.Label(master=down_frame, text='NOME ACP-2')
+        entry_nomeacp2 = ttk.Entry(master=down_frame, textvariable=var_nomeacp2)
+
+        label_rgacp2 = ttk.Label(master=down_frame, text='RG')
+        entry_rgacp2 = ttk.Entry(master=down_frame, textvariable=var_rgacp2)
+
+        label_nomeacp3 = ttk.Label(master=down_frame, text='NOME ACP-3')
+        entry_nomeacp3 = ttk.Entry(master=down_frame, textvariable=var_nomeacp3)
+
+        label_rgacp3 = ttk.Label(master=down_frame, text='RG')
+        entry_rgacp3 = ttk.Entry(master=down_frame, textvariable=var_rgacp3)
+
+        label_nomeacp4 = ttk.Label(master=down_frame, text='NOME ACP-4')
+        entry_nomeacp4 = ttk.Entry(master=down_frame, textvariable=var_nomeacp4)
+
+        label_rgacp4 = ttk.Label(master=down_frame, text='RG')
+        entry_rgacp4 = ttk.Entry(master=down_frame, textvariable=var_rgacp4)
 
 
-        btn_register = self.register_button(master=self)
-        btn_edit = self.edit_button(master=self)
-        btn_save_edit = self.save_edit_button(master=self)
-        btn_clear_form = self.clear_form_button(master=self)
-        btn_delete = self.delete_button(master=self)
+        btn_register = self.register_button(master=down_frame)
+        btn_edit = self.edit_button(master=down_frame)
+        btn_save_edit = self.save_edit_button(master=down_frame)
+        btn_clear_form = self.clear_form_button(master=down_frame)
+        btn_delete = self.delete_button(master=down_frame)
 
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
@@ -162,11 +196,34 @@ class Reservation_Form(Integrated_Form):
         label_numapto.grid(row=3, column=6, sticky='nswe')
         entry_numapto.grid(row=3, column=7, columnspan=2, sticky='nswe', padx=5, pady=5)
 
+        label_nomeacp1.grid(row=0, column=0, columnspan=2, sticky='nswe')
+        entry_nomeacp1.grid(row=0, column=2, columnspan=4, sticky='nswe', padx=5, pady=5)
+
+        label_rgacp1.grid(row=0, column=6, columnspan=2, sticky='nswe')
+        entry_rgacp1.grid(row=0, column=7, columnspan=3, sticky='nswe', padx=5, pady=5)
+
+        label_nomeacp2.grid(row=1, column=0, columnspan=2, sticky='nswe')
+        entry_nomeacp2.grid(row=1, column=2, columnspan=4, sticky='nswe', padx=5, pady=5)
+
+        label_rgacp2.grid(row=1, column=6, columnspan=2, sticky='nswe')
+        entry_rgacp2.grid(row=1, column=7, columnspan=3, sticky='nswe', padx=5, pady=5)
+
+        label_nomeacp3.grid(row=2, column=0, columnspan=2, sticky='nswe')
+        entry_nomeacp3.grid(row=2, column=2, columnspan=4, sticky='nswe', padx=5, pady=5)
+
+        label_rgacp3.grid(row=2, column=6, columnspan=2, sticky='nswe')
+        entry_rgacp3.grid(row=2, column=7, columnspan=3, sticky='nswe', padx=5, pady=5)
+
+        label_nomeacp4.grid(row=3, column=0, columnspan=2, sticky='nswe')
+        entry_nomeacp4.grid(row=3, column=2, columnspan=4, sticky='nswe', padx=5, pady=5)
+
+        label_rgacp4.grid(row=3, column=6, columnspan=2, sticky='nswe')
+        entry_rgacp4.grid(row=3, column=7, columnspan=3, sticky='nswe', padx=5, pady=5)
 
 
-        btn_register.grid(row=7, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
-        btn_edit.grid(row=7, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
-        btn_save_edit.grid(row=6, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
-        btn_clear_form.grid(row=7, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
-        btn_delete.grid(row=6, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_register.grid(row=9, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_edit.grid(row=9, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_save_edit.grid(row=8, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_clear_form.grid(row=9, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_delete.grid(row=8, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
         

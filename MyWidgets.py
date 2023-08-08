@@ -70,6 +70,13 @@ class Integrated_Form(ttk.Labelframe):
             toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
             toast.show_toast()
             return
+        
+        # user confirmation input
+        ans = Messagebox().yesno(message=f"Confirm operation: \n insert data into {self.table_name} ?", title='Confirm', bootstyle='warning', parent=self)
+        if not ans == 'Yes':
+            toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
 
         # insert values into database
         columns, data, _ = self.get_form_data()
@@ -84,6 +91,9 @@ class Integrated_Form(ttk.Labelframe):
         # updates pandas table if there is pandas table connected
         if isinstance(self.integrated_table, Integrated_Table_View):
             self.integrated_table.update_table()
+        
+        # clear form
+        self.clear_form()
 
     def get_form_data(self):
         """
