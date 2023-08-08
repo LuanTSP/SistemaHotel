@@ -162,6 +162,24 @@ class Reservation_Form(Integrated_Form):
         btn_clear_form = self.clear_form_button(master=down_frame)
         btn_delete = self.delete_button(master=down_frame)
 
+        # validation
+        self.form_validation.validate_text(widget=entry_nome, textvariable=var_nome, required=True)
+        self.form_validation.validate_cpf(widget=entry_cpf, textvariable=var_cpf)
+        self.form_validation.validate_date(widget=entry_nasc, textvariable=var_nasc)
+        self.form_validation.validate_phone_number(widget=entry_celular, textvariable=var_celular, required=True)
+        self.form_validation.validate_contains(widget=entry_email, textvariable=var_email, text='@')
+        self.form_validation.validate_date(widget=entry_dtinicio, textvariable=var_dtinicio, required=True)
+        self.form_validation.validate_date(widget=entry_dtfinal, textvariable=var_dtfinal, required=True)
+        self.form_validation.validate_date(widget=entry_diareserva, textvariable=var_diareserva, required=True)
+        self.form_validation.validate_numeric(widget=entry_qthospede, textvariable=var_qthospede, required=True)
+        self.form_validation.validate_numeric(widget=entry_numapto, textvariable=var_numapto, required=True)
+        self.form_validation.validate_numeric(widget=entry_rgacp1, textvariable=var_rgacp1)
+        self.form_validation.validate_numeric(widget=entry_rgacp2, textvariable=var_rgacp2)
+        self.form_validation.validate_numeric(widget=entry_rgacp3, textvariable=var_rgacp3)
+        self.form_validation.validate_text(widget=entry_nomeacp1, textvariable=var_nomeacp1)
+        self.form_validation.validate_text(widget=entry_nomeacp2, textvariable=var_nomeacp2)
+        self.form_validation.validate_text(widget=entry_nomeacp3, textvariable=var_nomeacp3)
+
         # place
         label_nome.grid(row=0, column=0, sticky='nswe')
         entry_nome.grid(row=0, column=1, columnspan=6, sticky='nswe', padx=5, pady=5)

@@ -182,9 +182,8 @@ class Client_Form(Integrated_Form):
         btn_reservation = self.btn_reservation(master=self)
         
         # validation
-        
         self.form_validation.validate_text(widget=entry_nome, textvariable=self.var_nome, required=True)
-        self.form_validation.validate_numeric(widget=entry_rg, textvariable=self.var_rg, required=True)
+        self.form_validation.validate_numeric(widget=entry_rg, textvariable=self.var_rg)
         self.form_validation.validate_cpf(widget=entry_cpf, textvariable=self.var_cpf)
         self.form_validation.validate_numeric(widget=entry_cep, textvariable=self.var_cep)
         self.form_validation.validate_date(widget=entry_nasc, textvariable=self.var_nasc)
@@ -271,6 +270,9 @@ class Client_Form(Integrated_Form):
             self.linked_form[3].set(row_data[11]) # set celular
             self.linked_form[4].set(row_data[12]) # set email
             self.linked_form[5].set(row_data[13]) # set empresa
+
+            toast = ToastNotification(title="Info", message="Data copyed to reservation panel.", bootstyle='Info', duration=3000, icon='', position=(0,0,'nw'))
+            toast.show_toast()
 
         btn = ttk.Button(master=master, text='Reservation', bootstyle='warning', command=func)
         return btn
