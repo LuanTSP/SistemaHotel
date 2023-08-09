@@ -70,6 +70,12 @@ class Products_Form(Integrated_Form):
         btn_clear = self.clear_form_button(master=self)
         btn_delete = self.delete_button(master=self)
 
+        # validation
+        self.form_validation.validate_text(widget=entry_produto, textvariable=var_produto, required=True)
+        self.form_validation.validate_text(widget=entry_descr, textvariable=var_descr)
+        self.form_validation.validate_numeric(widget=entry_valor, textvariable=var_valor, required=True)
+        self.form_validation.validate_numeric(widget=entry_quantidade, textvariable=var_quantidade, required=True)
+
         # place
         label_produto.grid(row=0, column=0, sticky='nswe')
         entry_produto.grid(row=0, column=1, columnspan=2, sticky='nswe', padx=5, pady=5)
