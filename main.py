@@ -1,6 +1,7 @@
 from MyWidgets import MenuBar
 from controle_clientes import Controle_Clientes
 from controle_reservas import Controle_Reservas
+from controle_produtos import Controle_Produtos
 import ttkbootstrap as ttk
 import sqlite3
 import os
@@ -40,6 +41,9 @@ class App(ttk.Window):
         
         controle_reservas = Controle_Reservas(master=notebook, con=self.con, table_name='reservas')
         controle_reservas.pack(fill='both', expand=True)
+
+        controle_produtos = Controle_Produtos(master=notebook, con=self.con, table_name='produtos')
+        controle_produtos.pack(fill='both', expand=True)
         
         # linking forms
         controle_clientes.client_form.link(integrated_form=controle_reservas.reservation_form)
@@ -48,6 +52,7 @@ class App(ttk.Window):
         # adding to notebook
         notebook.add(child=controle_clientes, text='Clientes')
         notebook.add(child=controle_reservas, text='Reservas')
+        notebook.add(child=controle_produtos, text='Produtos')
 
         # run
         self.mainloop()
@@ -66,49 +71,65 @@ class App(ttk.Window):
         # create table clientes
         con.execute("""
             CREATE TABLE IF NOT EXISTS clientes
-                (client_id INTEGER PRIMARY KEY,
-                nome TEXT,
-                rg TEXT,
-                cpf TEXT,
-                endereco TEXT,
-                cidade TEXT,
-                estado TEXT,
-                pais TEXT,
-                cep TEXT,
-                nasc TEXT,
-                sexo TEXT,
-                celular TEXT,
-                email TEXT,
-                empresa TEXT,
-                cargo TEXT,
-                escolaridade TEXT,
-                profis TEXT,
-                defic TEXT)
+                (
+                    client_id INTEGER PRIMARY KEY,
+                    nome TEXT,
+                    rg TEXT,
+                    cpf TEXT,
+                    endereco TEXT,
+                    cidade TEXT,
+                    estado TEXT,
+                    pais TEXT,
+                    cep TEXT,
+                    nasc TEXT,
+                    sexo TEXT,
+                    celular TEXT,
+                    email TEXT,
+                    empresa TEXT,
+                    cargo TEXT,
+                    escolaridade TEXT,
+                    profis TEXT,
+                    defic TEXT
+                )
             """)
         
         # create table reservas
         con.execute("""
             CREATE TABLE IF NOT EXISTS reservas
-            (reservation_id INTEGER PRIMARY KEY,
-            nome TEXT,
-            cpf TEXT,
-            nasc TEXT,
-            celular TEXT,
-            email TEXT,
-            empresa TEXT,
-            dtinicio TEXT,
-            dtfinal TEXT,
-            diareserva TEXT,
-            qthospede TEXT,
-            numapto TEXT,
-            nomeacp1 TEXT,
-            rgacp1 TEXT,
-            nomeacp2 TEXT,
-            rgacp2 TEXT,
-            nomeacp3 TEXT,
-            rgacp3 TEXT,
-            nomeacp4 TEXT,
-            rgacp4 TEXT)
+            (
+                reservation_id INTEGER PRIMARY KEY,
+                nome TEXT,
+                cpf TEXT,
+                nasc TEXT,
+                celular TEXT,
+                email TEXT,
+                empresa TEXT,
+                dtinicio TEXT,
+                dtfinal TEXT,
+                diareserva TEXT,
+                qthospede TEXT,
+                numapto TEXT,
+                nomeacp1 TEXT,
+                rgacp1 TEXT,
+                nomeacp2 TEXT,
+                rgacp2 TEXT,
+                nomeacp3 TEXT,
+                rgacp3 TEXT,
+                nomeacp4 TEXT,
+                rgacp4 TEXT
+            )
+        """)
+
+        # create table produtos
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS produtos
+            (
+                prod_id INTEGER PRIMARY KEY,
+                produto TEXT,
+                descr TEXT,
+                valor TEXT,
+                quantidade TEXT
+            )     
         """)
 
         return con

@@ -103,7 +103,7 @@ class Integrated_Form(ttk.Labelframe):
         data = "("
         columns = "("
         col_data = ""
-        
+
         cursor = self.con.cursor()
         description = cursor.execute(f"SELECT * FROM {self.table_name}").description
         table_columns = list(map(lambda x: x[0], description))[1:] # discard id to be added automaticaly by sqlite3
