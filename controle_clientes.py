@@ -17,7 +17,7 @@ class Controle_Clientes(ttk.Frame):
         self.rowconfigure(index=(0,1), weight=1, uniform='a')
         self.columnconfigure(index=(0,1), weight=1, uniform='a')
 
-        # self.make_sample_data() # add 100 sample records to database
+        self.make_sample_data() # add 100 sample records to database
 
         # integrated table
         table = Integrated_Table_View(master=self, con=self.con, table_name='clientes', paginated=True)

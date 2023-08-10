@@ -19,8 +19,8 @@ class Controle_Produtos(ttk.Frame):
         table = Integrated_Table_View(master=self, con=self.con, table_name=self.table_name)
         table.grid(row=0, column=0, sticky='nswe')
 
-        products_form = Products_Form(master=self, con=self.con, table_name=self.table_name, integrated_table=table)
-        products_form.grid(row=0, column=1, sticky='nswe')
+        self.products_form = Products_Form(master=self, con=self.con, table_name=self.table_name, integrated_table=table)
+        self.products_form.grid(row=0, column=1, sticky='nswe')
 
 
 class Products_Form(Integrated_Form):
@@ -94,7 +94,5 @@ class Products_Form(Integrated_Form):
         btn_save_edit.grid(row=4, column=4, sticky='nswe', padx=5, pady=5)
         btn_clear.grid(row=5, column=0, sticky='nswe', padx=5, pady=5)
         btn_delete.grid(row=4, column=0, sticky='nswe', padx=5, pady=5)
-
-
 
 

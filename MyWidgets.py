@@ -60,9 +60,10 @@ class Integrated_Form(ttk.Labelframe):
         self.id = ttk.StringVar(value='')
         self.vars = []
         self.linked_form = []
+        self.linked_table = None
         super().__init__(master=master, text=text)
   
-    def add_to_database(self):
+    def add_to_database(self, clear_form=True, confirmation=True):
         """
             Add form data to the database
         """
@@ -73,11 +74,12 @@ class Integrated_Form(ttk.Labelframe):
             return
         
         # user confirmation input
-        ans = Messagebox().yesno(message=f"Confirm operation: \n insert data into {self.table_name} ?", title='Confirm', bootstyle='warning', parent=self)
-        if not ans == 'Yes':
-            toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
-            toast.show_toast()
-            return
+        if confirmation:
+            ans = Messagebox().yesno(message=f"Confirm operation: \n insert data into {self.table_name} ?", title='Confirm', bootstyle='warning', parent=self)
+            if not ans == 'Yes':
+                toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
+                toast.show_toast()
+                return
 
         # insert values into database
         columns, data, _ = self.get_form_data()
@@ -86,7 +88,7 @@ class Integrated_Form(ttk.Labelframe):
         self.con.commit()
 
         # display toast notification if success
-        toast = ToastNotification(title="Success", message="Client added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
+        toast = ToastNotification(title="Success", message="Data added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
         toast.show_toast()
 
         # updates pandas table if there is pandas table connected
@@ -94,7 +96,8 @@ class Integrated_Form(ttk.Labelframe):
             self.integrated_table.update_table()
         
         # clear form
-        self.clear_form()
+        if clear_form:
+            self.clear_form()
 
     def get_form_data(self):
         """
@@ -254,12 +257,21 @@ class Integrated_Form(ttk.Labelframe):
     
     def clear_form_button(self, master):
         btn_clear_form = ttk.Button(master=master, text='Clear', command=self.clear_form, bootstyle='warning')
-        ToolTip(widget=btn_clear_form, text='Reset form of cancel edit.', bootstyle=('warning', 'inverse'))
+        ToolTip(widget=btn_clear_form, text='Reset form or cancel edit.', bootstyle=('warning', 'inverse'))
 
         return btn_clear_form
 
-    def link(self, integrated_form):
-        self.linked_form = integrated_form.vars
+    def link(self, integrated_form=None):
+        if isinstance(integrated_form, Integrated_Form):
+            # link variables
+            self.linked_form = integrated_form.vars
+
+            # link tables
+            if isinstance(integrated_form.integrated_table, Integrated_Table_View):
+                self.linked_table = integrated_form.integrated_table
+        
+            
+        
 
 
 

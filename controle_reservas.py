@@ -48,8 +48,8 @@ class Reservation_Form(Integrated_Form):
         down_frame.rowconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
         down_frame.columnconfigure(index=(0,1,2,3,4,5,6,7,8,9), weight=1, uniform='a')
 
-        top_frame.grid(row=0, column=0, sticky='nswe')
-        down_frame.grid(row=1, column=0, sticky='nswe')
+        top_frame.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
+        down_frame.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
 
         # VARIABLES
         var_nome = ttk.StringVar(value='')
@@ -161,6 +161,7 @@ class Reservation_Form(Integrated_Form):
         btn_save_edit = self.save_edit_button(master=down_frame)
         btn_clear_form = self.clear_form_button(master=down_frame)
         btn_delete = self.delete_button(master=down_frame)
+        btn_add_consumption = self.consumption_button(master=down_frame)
 
         # validation
         self.form_validation.validate_text(widget=entry_nome, textvariable=var_nome, required=True)
@@ -241,7 +242,58 @@ class Reservation_Form(Integrated_Form):
 
         btn_register.grid(row=9, column=8, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_edit.grid(row=9, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_add_consumption.grid(row=9, column=4, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_save_edit.grid(row=8, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_clear_form.grid(row=9, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_delete.grid(row=8, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
         
+    def consumption_button(self, master):
+        def add_consumption():
+            Consumpiton_PopUp_Window(con=self.con)
+        
+        btn = ttk.Button(master=master, text='Add Consumption', command=add_consumption, bootstyle='warning')
+        return btn
+    
+
+class Consumpiton_PopUp_Window(ttk.Toplevel):
+    def __init__(self, con: sqlite3.Connection):
+        # initial setup
+        super().__init__(
+            title='Add Consumption',
+            iconphoto='',
+            size=(500, 500),
+            resizable=(False, False),
+            topmost=True,
+        )
+        self.con = con
+
+        # layout
+        self.rowconfigure(index=0, weight=2, uniform='a')
+        self.rowconfigure(index=1, weight=1, uniform='a')
+        self.columnconfigure(index=0, weight=1, uniform='a')
+
+        # widgets
+        table = Integrated_Table_View(master=self, con=con, table_name='produtos')
+        table.grid(row=0, column=0, sticky='nswe')
+
+        frame = ttk.LabelFrame(master=self, text='Add Consumption form')
+        frame.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
+
+        # frame layout
+        frame.rowconfigure(index=(0,1,2), weight=1, uniform='a')
+        frame.columnconfigure(index=(0,1,2,3,4), weight=1, uniform='a')
+
+        # widgets
+        btn_add = ttk.Button(master=frame, text="Add", bootstyle='default')
+        btn_add.grid(row=2, column=4, columnspan=1, sticky='nswe', padx=5, pady=5)
+
+        btn_remove = ttk.Button(master=frame, text="Remove", bootstyle='danger')
+        btn_remove.grid(row=2, column=3, columnspan=1, sticky='nswe', padx=5, pady=5)
+
+        # run
+        self.mainloop()
+
+    
+    
+
+
