@@ -51,13 +51,12 @@ class App(ttk.Window):
         
         # linking forms
         controle_clientes.client_form.link(integrated_form=controle_reservas.reservation_form)
-        controle_consumos.consumption_form.link(integrated_form=controle_produtos.products_form)
+        
 
         # adding to notebook
         notebook.add(child=controle_clientes, text='Clientes')
         notebook.add(child=controle_reservas, text='Reservas')
         notebook.add(child=controle_produtos, text='Produtos')
-        notebook.add(child=controle_consumos, text='Consumos')
 
         # run
         self.mainloop()
