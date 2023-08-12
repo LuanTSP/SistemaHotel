@@ -273,22 +273,57 @@ class Integrated_Register_Form(ttk.Labelframe):
     def declare_variables(self, vars: list):
         self.vars = vars
 
+    def add_to_database_batch(self, clear_form=True, confirmation=True):
+        """
+            Add form data to the database
+        """
+        # check if form is valid and display toast notification
+        if not self.form_validation.check_validation():
+            toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+            
+        # get quantity to add
+        var_quantity = ttk.StringVar(value='')
+        self.pop_up_select_quantity(var_quantity=var_quantity)
 
-class Integrated_Storage_Form(Integrated_Register_Form):
+        # user confirmation input
+        if confirmation:
+            ans = Messagebox().yesno(message=f"Confirm operation: \n insert data into {self.table_name} ?", title='Confirm', bootstyle='warning', parent=self)
+            if not ans == 'Yes':
+                toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
+                toast.show_toast()
+                return
 
-    def __init__(self, master, con, table_name, integrated_table, text):
-        # initial setup
-        super().__init__(
-            master=master,
-            con=con,
-            table_name=table_name,
-            integrated_table=integrated_table,
-            text=text
-        )
-        self.quantity = ttk.StringVar(value=0)   
+        if int(var_quantity.get()) <= 0:
+            print("Im here")
+            return
 
-    def pop_up_select_quantity(self):
+        # insert values into database
+        columns, data, _ = self.get_form_data()
+
+        for _ in range(int(var_quantity.get()) - 1):
+            data += ',' + data
+
+        cursor = self.con.cursor()
+        cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
+        self.con.commit()
+
+        # display toast notification if success
+        toast = ToastNotification(title="Success", message="Data added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
+        toast.show_toast()
+
+        # updates pandas table if there is pandas table connected
+        if isinstance(self.integrated_table, Integrated_Table_View):
+            self.integrated_table.update_table()
+        
+        # clear form
+        if clear_form:
+            self.clear_form()
+
+    def pop_up_select_quantity(self, var_quantity):
         # create toplevel
+        
         toplevel = ttk.Toplevel(
             title='Add to Storage',
             size=(300,200),
@@ -303,11 +338,21 @@ class Integrated_Storage_Form(Integrated_Register_Form):
 
         # widgets
         label_quantity = ttk.Label(master=toplevel, text="QUANTITY")
-        entry_quantity = ttk.Entry(master=toplevel, textvariable=self.quantity)
-        btn_add = ttk.Button(master=toplevel, command=lambda: print(f'Adding {self.quantity.get()} times into database'), text='Add to Database')
+        entry_quantity = ttk.Entry(master=toplevel, textvariable=var_quantity)
 
         # validation
-        self.form_validation.validate_numeric(widget=entry_quantity, textvariable=self.quantity, required=True)
+        validation = Validate()
+        validation.validate_numeric(widget=entry_quantity, textvariable=var_quantity, required=True)
+        
+        def check():
+            if not validation.check_validation():
+                toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
+                toast.show_toast()
+                return
+            var_quantity.set(entry_quantity.get())
+
+        btn_add = ttk.Button(master=toplevel, command=check, text='Ok')
+
 
         # place
         label_quantity.grid(row=1, column=0, sticky='nswe')
@@ -317,9 +362,11 @@ class Integrated_Storage_Form(Integrated_Register_Form):
         # run
         toplevel.mainloop()
 
+         
+
 
 class MenuBar(ttk.Frame):
-    
+
     def __init__(self, master):
         # initial setup
         super().__init__(master=master, bootstyle="dark")

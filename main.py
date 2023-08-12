@@ -2,6 +2,7 @@ from MyWidgets import MenuBar
 from controle_clientes import Controle_Clientes
 from controle_reservas import Controle_Reservas
 from controle_produtos import Controle_Produtos
+from controle_consumos import Controle_Consumos
 import ttkbootstrap as ttk
 import sqlite3
 import os
@@ -44,6 +45,9 @@ class App(ttk.Window):
 
         controle_produtos = Controle_Produtos(master=notebook, con=self.con, table_name='produtos')
         controle_produtos.pack(fill='both', expand=True)
+
+        controle_consumos = Controle_Consumos(master=notebook, con=self.con, table_name='consumos')
+        controle_consumos.pack(fill='both', expand=True)
         
         # linking forms
         controle_clientes.client_form.link(integrated_form=controle_reservas.reservation_form)
@@ -53,6 +57,7 @@ class App(ttk.Window):
         notebook.add(child=controle_clientes, text='Clientes')
         notebook.add(child=controle_reservas, text='Reservas')
         notebook.add(child=controle_produtos, text='Produtos')
+        notebook.add(child=controle_consumos, text='Consumos')
 
         # run
         self.mainloop()
