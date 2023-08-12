@@ -1,9 +1,10 @@
 import ttkbootstrap as ttk
 import sqlite3
-from MyWidgets import Integrated_Table_View, Integrated_Form
+from MyWidgets import Integrated_Table_View, Integrated_Register_Form
 
 
 class Controle_Produtos(ttk.Frame):
+    
     def __init__(self, master, con: sqlite3.Connection, table_name: str):
         # initial setup
         super().__init__(master=master)
@@ -23,7 +24,8 @@ class Controle_Produtos(ttk.Frame):
         self.products_form.grid(row=0, column=1, sticky='nswe')
 
 
-class Products_Form(Integrated_Form):
+class Products_Form(Integrated_Register_Form):
+
     def __init__(self, master, con: sqlite3.Connection, table_name: str, integrated_table:Integrated_Table_View=None, text='Produtos'):
         # initial setup
         super().__init__(
@@ -44,12 +46,12 @@ class Products_Form(Integrated_Form):
         var_valor = ttk.StringVar(value='')
         var_quantidade = ttk.StringVar(value='')
 
-        self.vars = [
+        self.declare_variables([
             var_produto,
             var_descr,
             var_valor,
             var_quantidade
-        ]
+        ])
 
         # fields
         label_produto = ttk.Label(master=self, text='PRODUTO')

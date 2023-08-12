@@ -49,7 +49,7 @@ class Integrated_Table_View(Tableview):
         self.autofit_columns()
 
 
-class Integrated_Form(ttk.Labelframe):
+class Integrated_Register_Form(ttk.Labelframe):
 
     def __init__(self, master, con: sqlite3.Connection, table_name: str, integrated_table: Integrated_Table_View=None, text='Table'):
         # initial setup
@@ -262,7 +262,7 @@ class Integrated_Form(ttk.Labelframe):
         return btn_clear_form
 
     def link(self, integrated_form=None):
-        if isinstance(integrated_form, Integrated_Form):
+        if isinstance(integrated_form, Integrated_Register_Form):
             # link variables
             self.linked_form = integrated_form.vars
 
@@ -270,12 +270,56 @@ class Integrated_Form(ttk.Labelframe):
             if isinstance(integrated_form.integrated_table, Integrated_Table_View):
                 self.linked_table = integrated_form.integrated_table
         
-            
-        
+    def declare_variables(self, vars: list):
+        self.vars = vars
 
+
+class Integrated_Storage_Form(Integrated_Register_Form):
+
+    def __init__(self, master, con, table_name, integrated_table, text):
+        # initial setup
+        super().__init__(
+            master=master,
+            con=con,
+            table_name=table_name,
+            integrated_table=integrated_table,
+            text=text
+        )
+        self.quantity = ttk.StringVar(value=0)   
+
+    def pop_up_select_quantity(self):
+        # create toplevel
+        toplevel = ttk.Toplevel(
+            title='Add to Storage',
+            size=(300,200),
+            resizable=(False, False),
+            topmost=True
+        )
+        # layout
+        toplevel.rowconfigure(index=0, weight=1, uniform='a')
+        toplevel.rowconfigure(index=1, weight=2, uniform='a')
+        toplevel.columnconfigure(index=0, weight=1, uniform='a')
+        toplevel.columnconfigure(index=1, weight=2, uniform='a')
+
+        # widgets
+        label_quantity = ttk.Label(master=toplevel, text="QUANTITY")
+        entry_quantity = ttk.Entry(master=toplevel, textvariable=self.quantity)
+        btn_add = ttk.Button(master=toplevel, command=lambda: print(f'Adding {self.quantity.get()} times into database'), text='Add to Database')
+
+        # validation
+        self.form_validation.validate_numeric(widget=entry_quantity, textvariable=self.quantity, required=True)
+
+        # place
+        label_quantity.grid(row=1, column=0, sticky='nswe')
+        entry_quantity.grid(row=1, column=1, sticky='nswe', padx=5, pady=5)
+        btn_add.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
+
+        # run
+        toplevel.mainloop()
 
 
 class MenuBar(ttk.Frame):
+    
     def __init__(self, master):
         # initial setup
         super().__init__(master=master, bootstyle="dark")

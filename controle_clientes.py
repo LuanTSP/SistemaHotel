@@ -1,5 +1,5 @@
 import sqlite3
-from MyWidgets import Integrated_Form, Integrated_Table_View
+from MyWidgets import Integrated_Register_Form, Integrated_Table_View
 from random import choice, randint
 from ttkbootstrap.toast import ToastNotification
 import ttkbootstrap as ttk
@@ -17,7 +17,7 @@ class Controle_Clientes(ttk.Frame):
         self.rowconfigure(index=(0,1), weight=1, uniform='a')
         self.columnconfigure(index=(0,1), weight=1, uniform='a')
 
-        self.make_sample_data() # add 100 sample records to database
+        # self.make_sample_data() # add 100 sample records to database
 
         # integrated table
         table = Integrated_Table_View(master=self, con=self.con, table_name='clientes', paginated=True)
@@ -66,7 +66,7 @@ class Controle_Clientes(ttk.Frame):
             self.con.commit()
 
 
-class Client_Form(Integrated_Form):
+class Client_Form(Integrated_Register_Form):
 
     def __init__(self, master, con: sqlite3.Connection, table_name: str, integrate_table: Integrated_Table_View, text='Table'):
         super().__init__(
@@ -100,7 +100,7 @@ class Client_Form(Integrated_Form):
         self.var_profis = ttk.StringVar(value='')
         self.var_defic = ttk.StringVar(value='')
 
-        self.vars = [
+        self.declare_variables([
             self.var_nome, 
             self.var_rg, 
             self.var_cpf, 
@@ -118,7 +118,7 @@ class Client_Form(Integrated_Form):
             self.var_escolaridade,
             self.var_profis,
             self.var_defic,
-        ]
+        ])
 
         # WIDGETS
 

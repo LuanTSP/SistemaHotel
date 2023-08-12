@@ -1,4 +1,4 @@
-from MyWidgets import Integrated_Form, Integrated_Table_View
+from MyWidgets import Integrated_Register_Form, Integrated_Table_View
 import ttkbootstrap as ttk
 import sqlite3
 
@@ -24,7 +24,7 @@ class Controle_Reservas(ttk.Frame):
         self.reservation_form.grid(row=0, column=1, rowspan=2, sticky='nswe')
 
 
-class Reservation_Form(Integrated_Form):
+class Reservation_Form(Integrated_Register_Form):
     def __init__(self, master, con: sqlite3.Connection, table_name: str, integrated_table: str, text='Table'):
         super().__init__(
             master=master,
@@ -72,7 +72,7 @@ class Reservation_Form(Integrated_Form):
         var_nomeacp4 = ttk.StringVar(value='')
         var_rgacp4 = ttk.StringVar(value='')
 
-        self.vars = [
+        self.declare_variables([
             var_nome,
             var_cpf,
             var_nasc,
@@ -92,7 +92,7 @@ class Reservation_Form(Integrated_Form):
             var_rgacp3,
             var_nomeacp4,
             var_rgacp4,
-        ]
+        ])
 
         # WIDGETS
         
