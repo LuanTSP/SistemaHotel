@@ -20,8 +20,8 @@ class Controle_Consumos(ttk.Frame):
         table = Integrated_Table_View(master=self, con=con, table_name=table_name, paginated=True)
         table.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
 
-        consumption_form = Consumption_Form(master=self, con=con, table_name='consumos', integrated_table=table, text='Consumos')
-        consumption_form.grid(row=0, column=1, sticky='nswe', padx=5, pady=5)
+        self.consumption_form = Consumption_Form(master=self, con=con, table_name='consumos', integrated_table=table, text='Consumos')
+        self.consumption_form.grid(row=0, column=1, sticky='nswe', padx=5, pady=5)
 
 
 class Consumption_Form(Integrated_Register_Form):
@@ -65,8 +65,13 @@ class Consumption_Form(Integrated_Register_Form):
         label_quantity = ttk.Label(master=self, text='QUANT.')
         entry_quantity = ttk.Entry(master=self, textvariable=self.var_quantity)
 
-        btn_register = self.register_button(master=self, confirmation=False, clear_form=True)
+        btn_register = self.register_button(master=self)
         btn_register.configure(command=self.register_multiple)
+
+        btn_delete = self.delete_button(master=self)
+        btn_edit = self.edit_button(master=self)
+        btn_save_edit = self.save_edit_button(master=self)
+        btn_clear = self.clear_form_button(master=self)
 
         # validation
         self.form_validation.validate_numeric(widget=entry_numapto, textvariable=self.var_numapto, required=True)
@@ -83,11 +88,15 @@ class Consumption_Form(Integrated_Register_Form):
         label_quantity.grid(row=1, column=0, sticky='nswe')
         entry_quantity.grid(row=1, column=1, sticky='nswe', padx=5, pady=5)
 
+        btn_delete.grid(row=5, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_clear.grid(row=6, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_edit.grid(row=6, column=3, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_save_edit.grid(row=5, column=3, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_register.grid(row=6, column=5, columnspan=2, sticky='nswe', padx=5, pady=5)
     
     def register_multiple(self):
         """
-            Add form data to the database
+            Add form data to the database in multiple times
         """
         # check if form is valid and display toast notification
         if not self.form_validation.check_validation():
@@ -99,6 +108,18 @@ class Consumption_Form(Integrated_Register_Form):
         ans = Messagebox().yesno(message=f"Confirm operation: \n insert data into {self.table_name} ?", title='Confirm', bootstyle='warning', parent=self)
         if not ans == 'Yes':
             toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+        
+        # check produtos
+        if not self.product_is_avaliable():
+            toast = ToastNotification(title="Error", message="Product Not Found or Quantity Not Enought.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+        
+        # check reservation
+        if not self.reservation_is_avaliable():
+            toast = ToastNotification(title="Error", message="Reservation Not Found.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
             toast.show_toast()
             return
         
@@ -117,8 +138,11 @@ class Consumption_Form(Integrated_Register_Form):
             cursor = self.con.cursor()
             cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {values}")
             self.con.commit()
-
         
+        # update quantity data in produtos
+        quantity = int(list(self.con.execute(f"SELECT quantidade FROM produtos WHERE rowid = {self.var_prod_id.get()}"))[0][0])
+        self.con.execute(f"UPDATE produtos SET quantidade = {quantity - q} WHERE rowid = {self.var_prod_id.get()}")
+        self.linked_table.update_table()
 
         # display toast notification if success
         toast = ToastNotification(title="Success", message="Data added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
@@ -131,3 +155,23 @@ class Consumption_Form(Integrated_Register_Form):
         # clear form
         self.clear_form()
 
+    def product_is_avaliable(self):
+        """
+            Checks if product is avalible to be consumed
+        """
+        results = list(self.con.execute(f"SELECT quantidade FROM produtos WHERE rowid = {self.var_prod_id.get()}"))
+        if len(results) == 0:
+            return False        
+        
+        q = int(results[0][0])
+        if int(self.var_quantity.get()) > q:
+            return False
+        
+        return True
+
+    def reservation_is_avaliable(self):
+        result = list(self.con.execute(f"SELECT numapto FROM reservas WHERE numapto = {self.var_numapto.get()}"))
+
+        if len(result) == 0:
+            return False
+        return True

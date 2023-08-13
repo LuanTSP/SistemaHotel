@@ -51,6 +51,7 @@ class App(ttk.Window):
         
         # linking forms
         controle_clientes.client_form.link(integrated_form=controle_reservas.reservation_form)
+        controle_consumos.consumption_form.link(integrated_form=controle_produtos.products_form)
         
 
         # adding to notebook
