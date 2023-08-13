@@ -1,4 +1,6 @@
 import pandas as pd
+import openpyxl
+import os
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.tooltip import ToolTip
@@ -284,17 +286,42 @@ class Integrated_Register_Form(ttk.Labelframe):
         self.add_vars = add_vars
 
 
-         
-
-
 class MenuBar(ttk.Frame):
 
     def __init__(self, master):
         # initial setup
-        super().__init__(master=master, bootstyle="dark")
+        super().__init__(master=master)
     
     def add_button(self, master, text: str, command=lambda x:x):
         btn = ttk.Button(master=master, text=text, command=command)
+        btn.pack(side='left', fill='y', padx=5, pady=5)
+        return btn
+    
+    def generate_report_button(self, master, text: str, con: sqlite3.Connection):
+        def generate_report():
+            # get table names
+            tables = list(con.execute("SELECT name from sqlite_master WHERE type='table'"))
+            tables = [table[0] for table in tables]
+            
+            # open workbook and create if not exists
+            if os.path.exists('./Reports/Report.xlsx'):
+                os.remove('./Reports/Report.xlsx')
+
+            book = openpyxl.Workbook()
+            book.save(filename="Reports/Report.xlsx")
+
+            book = openpyxl.load_workbook(filename='./Reports/Report.xlsx')
+            
+            for table in tables:
+                data = pd.read_sql(f'SELECT * FROM {table}', con=con)
+                book.create_sheet(title=table)
+
+                with pd.ExcelWriter('./Reports/Report.xlsx', mode='a', engine='openpyxl') as writer:
+                    data.to_excel(excel_writer=writer, sheet_name=table, index=False)
+            
+            book.close()
+
+        btn = ttk.Button(master=master, text=text, command=generate_report)
         btn.pack(side='left', fill='y', padx=5, pady=5)
         return btn
 

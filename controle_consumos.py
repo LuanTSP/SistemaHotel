@@ -6,6 +6,7 @@ from MyWidgets import Integrated_Register_Form, Integrated_Table_View
 
 
 class Controle_Consumos(ttk.Frame):
+
     def __init__(self, master, con: sqlite3.Connection, table_name: str):
         # initial setup
         super().__init__(
@@ -25,6 +26,7 @@ class Controle_Consumos(ttk.Frame):
 
 
 class Consumption_Form(Integrated_Register_Form):
+    
     def __init__(self, master, con, table_name, integrated_table, text):
         # initial setup
         super().__init__(

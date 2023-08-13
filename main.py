@@ -30,6 +30,7 @@ class App(ttk.Window):
         menu = MenuBar(master=self)
         menu.add_button(master=menu, text="File", command=lambda: print("File Button"))
         menu.add_button(master=menu, text="Settings", command=lambda: print("Settings Button"))
+        menu.generate_report_button(master=menu, text='Generate Report', con=self.con)
         menu.grid(row=0, column=0, sticky='nswe')
 
         # tabs
