@@ -108,9 +108,17 @@ class Consumption_Form(Integrated_Register_Form):
 
         # insert values into database
         columns, data, _ = self.get_form_data()
-        cursor = self.con.cursor()
-        cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
-        self.con.commit()
+        q = int(self.var_quantity.get())
+        values = data
+        if q > 0:
+            for _ in range(q - 1):
+                values += ', ' + data
+            
+            cursor = self.con.cursor()
+            cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {values}")
+            self.con.commit()
+
+        
 
         # display toast notification if success
         toast = ToastNotification(title="Success", message="Data added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
