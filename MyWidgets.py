@@ -63,7 +63,7 @@ class Integrated_Register_Form(ttk.Labelframe):
         self.linked_table = None
         super().__init__(master=master, text=text)
   
-    def add_to_database(self, clear_form=True, confirmation=True):
+    def add_to_database(self, clear_form=True, confirmation=True, multiple=False):
         """
             Add form data to the database
         """
@@ -72,6 +72,11 @@ class Integrated_Register_Form(ttk.Labelframe):
             toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
             toast.show_toast()
             return
+        
+        if multiple: # if multiple, open popup and get quantity of items
+            self.quantity = ttk.StringVar(value='0')
+            toplevel = self.pop_up_select_quantity()
+            toplevel.mainloop()
         
         # user confirmation input
         if confirmation:
@@ -83,6 +88,10 @@ class Integrated_Register_Form(ttk.Labelframe):
 
         # insert values into database
         columns, data, _ = self.get_form_data()
+
+        if multiple: # if multiple, modify data
+            print(self.quantity.get())
+
         cursor = self.con.cursor()
         cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
         self.con.commit()
@@ -231,8 +240,8 @@ class Integrated_Register_Form(ttk.Labelframe):
         # update display
         self.integrated_table.update_table()
         
-    def register_button(self, master):
-        btn_register = ttk.Button(master=master, text='Register', command=self.add_to_database)
+    def register_button(self, master, clear_form=True, confirmation=True, multiple=False):
+        btn_register = ttk.Button(master=master, text='Register', command= lambda: self.add_to_database(clear_form=clear_form, confirmation=confirmation, multiple=multiple))
         ToolTip(widget=btn_register, text='Add data to database.', bootstyle=('dark', 'inverse'))
 
         return btn_register
@@ -321,46 +330,36 @@ class Integrated_Register_Form(ttk.Labelframe):
         if clear_form:
             self.clear_form()
 
-    def pop_up_select_quantity(self, var_quantity):
+    def pop_up_select_quantity(self):
         # create toplevel
-        
         toplevel = ttk.Toplevel(
-            title='Add to Storage',
+            title='Select Quantity',
             size=(300,200),
-            resizable=(False, False),
-            topmost=True
+            resizable=(False, False)
         )
+
         # layout
-        toplevel.rowconfigure(index=0, weight=1, uniform='a')
-        toplevel.rowconfigure(index=1, weight=2, uniform='a')
-        toplevel.columnconfigure(index=0, weight=1, uniform='a')
-        toplevel.columnconfigure(index=1, weight=2, uniform='a')
+        self.rowconfigure(index=(0,1), weight=1, uniform='a')
+        self.columnconfigure(index=(0,1), weight=1, uniform='a')
+
+        # btn command
+        def comm():
+            self.quantity.set(entry_quantity.get())
+            toplevel.destroy()
+
 
         # widgets
-        label_quantity = ttk.Label(master=toplevel, text="QUANTITY")
-        entry_quantity = ttk.Entry(master=toplevel, textvariable=var_quantity)
-
-        # validation
-        validation = Validate()
-        validation.validate_numeric(widget=entry_quantity, textvariable=var_quantity, required=True)
-        
-        def check():
-            if not validation.check_validation():
-                toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
-                toast.show_toast()
-                return
-            var_quantity.set(entry_quantity.get())
-
-        btn_add = ttk.Button(master=toplevel, command=check, text='Ok')
-
+        label_quantity = ttk.Label(master=toplevel, text='QUANT.')
+        entry_quantity = ttk.Entry(master=toplevel, textvariable=self.quantity)
+        btn = ttk.Button(master=toplevel, text='Click Me', command=comm)
 
         # place
-        label_quantity.grid(row=1, column=0, sticky='nswe')
-        entry_quantity.grid(row=1, column=1, sticky='nswe', padx=5, pady=5)
-        btn_add.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
-
-        # run
-        toplevel.mainloop()
+        label_quantity.grid(row=0, column=0, sticky='nswe')
+        entry_quantity.grid(row=0, column=1, sticky='nswe', padx=5, pady=5)
+        btn.grid(row=1, column=1, sticky='nswe', padx=5, pady=5)
+        
+        return toplevel
+        
 
          
 

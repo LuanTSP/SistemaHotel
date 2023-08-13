@@ -56,9 +56,11 @@ class Consumption_Form(Integrated_Register_Form):
         label_prod_id = ttk.Label(master=self, text='PROD. ID')
         entry_prod_id = ttk.Entry(master=self, textvariable=self.var_prod_id)
 
+        btn_register = self.register_button(master=self, multiple=True, confirmation=False)
+
         # validation
         self.form_validation.validate_numeric(widget=entry_numapto, textvariable=self.var_numapto, required=True)
-        self.form_validation.validate_numeric(widget=entry_prod_id, textvariable=self.var_prod_id,required=True)
+        self.form_validation.validate_numeric(widget=entry_prod_id, textvariable=self.var_prod_id, required=True)
 
         # place
         label_numapto.grid(row=0, column=0, sticky='nswe')
@@ -66,3 +68,5 @@ class Consumption_Form(Integrated_Register_Form):
 
         label_prod_id.grid(row=0, column=2, sticky='nswe')
         entry_prod_id.grid(row=0, column=3, sticky='nswe', padx=5, pady=5)
+
+        btn_register.grid(row=6, column=5, columnspan=2, sticky='nswe', padx=5, pady=5)
