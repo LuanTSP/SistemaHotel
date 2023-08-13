@@ -59,11 +59,12 @@ class Integrated_Register_Form(ttk.Labelframe):
         self.form_validation = Validate()
         self.id = ttk.StringVar(value='')
         self.vars = []
+        self.add_vars = []
         self.linked_form = []
         self.linked_table = None
         super().__init__(master=master, text=text)
   
-    def add_to_database(self, clear_form=True, confirmation=True, multiple=False):
+    def add_to_database(self, clear_form=True, confirmation=True):
         """
             Add form data to the database
         """
@@ -72,11 +73,6 @@ class Integrated_Register_Form(ttk.Labelframe):
             toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
             toast.show_toast()
             return
-        
-        if multiple: # if multiple, open popup and get quantity of items
-            self.quantity = ttk.StringVar(value='0')
-            toplevel = self.pop_up_select_quantity()
-            toplevel.mainloop()
         
         # user confirmation input
         if confirmation:
@@ -88,10 +84,6 @@ class Integrated_Register_Form(ttk.Labelframe):
 
         # insert values into database
         columns, data, _ = self.get_form_data()
-
-        if multiple: # if multiple, modify data
-            print(self.quantity.get())
-
         cursor = self.con.cursor()
         cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
         self.con.commit()
@@ -136,11 +128,17 @@ class Integrated_Register_Form(ttk.Labelframe):
         
     def clear_form(self):
         # enable disable
-        self.btn_save_edit.configure(state='disabled')
-        self.btn_delete.configure(state='enabled')
+        try:
+            self.btn_save_edit.configure(state='disabled')
+            self.btn_delete.configure(state='enabled')
+        except:
+            pass
         
         self.id.set('')
         for var in self.vars:
+            var.set(value='')
+        
+        for var in self.add_vars:
             var.set(value='')
        
     def fill_form(self):
@@ -240,8 +238,8 @@ class Integrated_Register_Form(ttk.Labelframe):
         # update display
         self.integrated_table.update_table()
         
-    def register_button(self, master, clear_form=True, confirmation=True, multiple=False):
-        btn_register = ttk.Button(master=master, text='Register', command= lambda: self.add_to_database(clear_form=clear_form, confirmation=confirmation, multiple=multiple))
+    def register_button(self, master, clear_form=True, confirmation=True):
+        btn_register = ttk.Button(master=master, text='Register', command= lambda: self.add_to_database(clear_form=clear_form, confirmation=confirmation))
         ToolTip(widget=btn_register, text='Add data to database.', bootstyle=('dark', 'inverse'))
 
         return btn_register
@@ -281,85 +279,10 @@ class Integrated_Register_Form(ttk.Labelframe):
         
     def declare_variables(self, vars: list):
         self.vars = vars
+    
+    def declare_aditional_varibles(self, add_vars: list):
+        self.add_vars = add_vars
 
-    def add_to_database_batch(self, clear_form=True, confirmation=True):
-        """
-            Add form data to the database
-        """
-        # check if form is valid and display toast notification
-        if not self.form_validation.check_validation():
-            toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
-            toast.show_toast()
-            return
-            
-        # get quantity to add
-        var_quantity = ttk.StringVar(value='')
-        self.pop_up_select_quantity(var_quantity=var_quantity)
-
-        # user confirmation input
-        if confirmation:
-            ans = Messagebox().yesno(message=f"Confirm operation: \n insert data into {self.table_name} ?", title='Confirm', bootstyle='warning', parent=self)
-            if not ans == 'Yes':
-                toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
-                toast.show_toast()
-                return
-
-        if int(var_quantity.get()) <= 0:
-            print("Im here")
-            return
-
-        # insert values into database
-        columns, data, _ = self.get_form_data()
-
-        for _ in range(int(var_quantity.get()) - 1):
-            data += ',' + data
-
-        cursor = self.con.cursor()
-        cursor.execute(f"INSERT INTO {self.table_name} {columns} VALUES {data}")
-        self.con.commit()
-
-        # display toast notification if success
-        toast = ToastNotification(title="Success", message="Data added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
-        toast.show_toast()
-
-        # updates pandas table if there is pandas table connected
-        if isinstance(self.integrated_table, Integrated_Table_View):
-            self.integrated_table.update_table()
-        
-        # clear form
-        if clear_form:
-            self.clear_form()
-
-    def pop_up_select_quantity(self):
-        # create toplevel
-        toplevel = ttk.Toplevel(
-            title='Select Quantity',
-            size=(300,200),
-            resizable=(False, False)
-        )
-
-        # layout
-        self.rowconfigure(index=(0,1), weight=1, uniform='a')
-        self.columnconfigure(index=(0,1), weight=1, uniform='a')
-
-        # btn command
-        def comm():
-            self.quantity.set(entry_quantity.get())
-            toplevel.destroy()
-
-
-        # widgets
-        label_quantity = ttk.Label(master=toplevel, text='QUANT.')
-        entry_quantity = ttk.Entry(master=toplevel, textvariable=self.quantity)
-        btn = ttk.Button(master=toplevel, text='Click Me', command=comm)
-
-        # place
-        label_quantity.grid(row=0, column=0, sticky='nswe')
-        entry_quantity.grid(row=0, column=1, sticky='nswe', padx=5, pady=5)
-        btn.grid(row=1, column=1, sticky='nswe', padx=5, pady=5)
-        
-        return toplevel
-        
 
          
 
