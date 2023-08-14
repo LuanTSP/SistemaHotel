@@ -1,5 +1,8 @@
 from MyWidgets import Integrated_Register_Form, Integrated_Table_View
+import pandas as pd
+from win32com import client
 import ttkbootstrap as ttk
+from ttkbootstrap.toast import ToastNotification
 import sqlite3
 
 class Controle_Reservas(ttk.Frame):
@@ -162,6 +165,7 @@ class Reservation_Form(Integrated_Register_Form):
         btn_clear_form = self.clear_form_button(master=down_frame)
         btn_delete = self.delete_button(master=down_frame)
         btn_add_consumption = self.consumption_button(master=down_frame)
+        btn_repoort_button = self.reservation_report_button(master=down_frame)
 
         # validation
         self.form_validation.validate_text(widget=entry_nome, textvariable=var_nome, required=True)
@@ -246,6 +250,7 @@ class Reservation_Form(Integrated_Register_Form):
         btn_save_edit.grid(row=8, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_clear_form.grid(row=9, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_delete.grid(row=8, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_repoort_button.grid(row=8, column=2, columnspan=2, sticky='nswe', padx=5, pady=5)
         
     def consumption_button(self, master):
         def add_consumption():
@@ -254,6 +259,59 @@ class Reservation_Form(Integrated_Register_Form):
         btn = ttk.Button(master=master, text='Add Consumption', command=add_consumption, bootstyle='warning')
         return btn
     
+    def reservation_report_button(self, master, con: sqlite3.Connection=None):
+        def make_report():
+            # getting data
+            rows = self.integrated_table.get_rows(selected=True)
+            if len(rows) > 1:
+                toast = ToastNotification(title="Error", message="Please select one row at a time", bootstyle='danger', duration=3000, icon='', position=(0,0,'nw'))
+                toast.show_toast()
+                return
+            
+            row_data = rows[0].values
+
+            # load workbook
+            excel = client.Dispatch("Excel.Application")
+            book = excel.Workbooks.Open('./Reports/ReservationModel.xlsx')
+            sheet = book.Worksheets[0]
+            
+
+            # cells
+            cells = [
+                sheet.Range('D4'),
+                sheet.Range('D7'),
+                sheet.Range('D8'),
+                sheet.Range('D9'),
+                sheet.Range('D10'),
+                sheet.Range('D11'),
+                sheet.Range('D12'),
+                sheet.Range('K7'),
+                sheet.Range('K8'),
+                sheet.Range('K9'),
+                sheet.Range('K10'),
+                sheet.Range('K11'),
+                sheet.Range('D14'),
+                sheet.Range('K14'),
+                sheet.Range('D15'),
+                sheet.Range('K15'),
+                sheet.Range('D16'),
+                sheet.Range('K16'),
+                sheet.Range('D17'),
+                sheet.Range('K17'),
+                sheet.Range('D18'),
+                sheet.Range('K18'),
+            ]
+
+            for c, v in zip(cells,row_data):
+                c.Value = v
+
+            # save workbook
+            book
+
+            df = pd.read_excel(io='./Reports/ReservationModel.xlsx', sheet_name='Model')
+        
+        btn = ttk.Button(master=master, text='Make Report', command=make_report)
+        return btn
 
 class Consumpiton_PopUp_Window(ttk.Toplevel):
     def __init__(self, con: sqlite3.Connection):

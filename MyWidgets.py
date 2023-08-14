@@ -1,5 +1,7 @@
 import pandas as pd
 import openpyxl
+from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.styles import PatternFill
 import os
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
@@ -315,10 +317,19 @@ class MenuBar(ttk.Frame):
             for table in tables:
                 data = pd.read_sql(f'SELECT * FROM {table}', con=con)
                 book.create_sheet(title=table)
+                sheet = book.get_sheet_by_name(name=table)
 
-                with pd.ExcelWriter('./Reports/Report.xlsx', mode='a', engine='openpyxl') as writer:
-                    data.to_excel(excel_writer=writer, sheet_name=table, index=False)
-            
+                # with pd.ExcelWriter('./Reports/Report.xlsx', mode='a', engine='openpyxl') as writer:
+                #     data.to_excel(excel_writer=writer, sheet_name=table, index=False)
+
+                for row in dataframe_to_rows(df=data, index=False):
+                    sheet.append(row)
+                
+                for cell in sheet[1]:
+                    cell.fill = PatternFill(start_color='2196F3', end_color='21A6F3', fill_type='solid')
+
+
+            book.save('./Reports/Report.xlsx')
             book.close()
 
         btn = ttk.Button(master=master, text=text, command=generate_report)
