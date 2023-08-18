@@ -1,8 +1,9 @@
-from MyWidgets import Integrated_Register_Form, Integrated_Table_View
+from MyWidgets import Integrated_Register_Form, Integrated_Table_View, Validate
 import os
 import xlwings as xw
 import ttkbootstrap as ttk
 from ttkbootstrap.toast import ToastNotification
+from ttkbootstrap.dialogs import Messagebox
 import sqlite3
 
 class Controle_Reservas(ttk.Frame):
@@ -250,16 +251,26 @@ class Reservation_Form(Integrated_Register_Form):
         btn_save_edit.grid(row=8, column=6, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_clear_form.grid(row=9, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
         btn_delete.grid(row=8, column=0, columnspan=2, sticky='nswe', padx=5, pady=5)
-        btn_repoort_button.grid(row=8, column=2, columnspan=2, sticky='nswe', padx=5, pady=5)
+        btn_repoort_button.grid(row=9, column=2, columnspan=2, sticky='nswe', padx=5, pady=5)
         
     def consumption_button(self, master):
         def add_consumption():
-            Consumpiton_PopUp_Window(con=self.con)
+            row_data = self.integrated_table.get_rows(selected=True)
+
+            if len(row_data) > 1:
+                toast = ToastNotification(title="Error", message="Multiple Rows Selected", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
+                toast.show_toast()
+                return
+            
+            numapto = row_data[0].values
+            numapto = numapto[11]
+            
+            Consumpiton_PopUp_Window(con=self.con, numapto=numapto, linked_tables=[self.linked_table, ])
         
         btn = ttk.Button(master=master, text='Add Consumption', command=add_consumption, bootstyle='warning')
         return btn
     
-    def reservation_report_button(self, master, con: sqlite3.Connection=None):
+    def reservation_report_button(self, master):
         def make_report():
             # getting data
             rows = self.integrated_table.get_rows(selected=True)
@@ -313,16 +324,20 @@ class Reservation_Form(Integrated_Register_Form):
         return btn
 
 class Consumpiton_PopUp_Window(ttk.Toplevel):
-    def __init__(self, con: sqlite3.Connection):
+    def __init__(self, con: sqlite3.Connection, numapto, linked_tables):
         # initial setup
         super().__init__(
-            title='Add Consumption',
+            title=f'Add Consumption to Room {numapto}',
             iconphoto='',
             size=(500, 500),
             resizable=(False, False),
             topmost=True,
         )
         self.con = con
+        self.numapto = numapto
+        self.linked_tables = linked_tables
+        self.var_quantity = ttk.StringVar(value='0')
+        self.form_validation = Validate()
 
         # layout
         self.rowconfigure(index=0, weight=2, uniform='a')
@@ -330,8 +345,8 @@ class Consumpiton_PopUp_Window(ttk.Toplevel):
         self.columnconfigure(index=0, weight=1, uniform='a')
 
         # widgets
-        table = Integrated_Table_View(master=self, con=con, table_name='produtos')
-        table.grid(row=0, column=0, sticky='nswe')
+        self.table = Integrated_Table_View(master=self, con=con, table_name='produtos')
+        self.table.grid(row=0, column=0, sticky='nswe')
 
         frame = ttk.LabelFrame(master=self, text='Add Consumption form')
         frame.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
@@ -341,14 +356,94 @@ class Consumpiton_PopUp_Window(ttk.Toplevel):
         frame.columnconfigure(index=(0,1,2,3,4), weight=1, uniform='a')
 
         # widgets
-        btn_add = ttk.Button(master=frame, text="Add", bootstyle='default')
+        label_quantity = ttk.Label(master=frame, text='QUNAT.')
+        label_quantity.grid(row=0, column=0, sticky='nswe')
+        
+        entry_quantity = ttk.Entry(master=frame, textvariable=self.var_quantity)
+        entry_quantity.grid(row=0, column=1, sticky='nswe', padx=5, pady=5)
+
+        btn_add = ttk.Button(master=frame, text="Add", bootstyle='default', command=self.register_multiple)
         btn_add.grid(row=2, column=4, columnspan=1, sticky='nswe', padx=5, pady=5)
 
-        btn_remove = ttk.Button(master=frame, text="Remove", bootstyle='danger')
-        btn_remove.grid(row=2, column=3, columnspan=1, sticky='nswe', padx=5, pady=5)
+        btn_cancel = ttk.Button(master=frame, text="Cancel", bootstyle='danger')
+        btn_cancel.grid(row=2, column=3, columnspan=1, sticky='nswe', padx=5, pady=5)
+
+        # validation
+        self.form_validation.validate_numeric(widget=entry_quantity, textvariable=self.var_quantity, required=True)
 
         # run
         self.mainloop()
+    
+    def register_multiple(self):
+        """
+            Add form data to the database in multiple times
+        """
+        # check if form is valid and display toast notification
+        if not self.form_validation.check_validation():
+            toast = ToastNotification(title="Invalid Form", message="Please fill all fields required.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+        
+        # check produtos
+        if not self.product_is_avaliable():
+            toast = ToastNotification(title="Error", message="Multiple Rows Selected or Quantity Not Enought.", bootstyle='danger', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+        
+        # user confirmation input
+        ans = Messagebox().yesno(message=f"Confirm operation: \n insert data into consumos ?", title='Confirm', bootstyle='warning', parent=self)
+        if not ans == 'Yes':
+            toast = ToastNotification(title="Info", message="Operation Canceled.", bootstyle='info', icon='', duration=3000, position=(0,0,'nw'))
+            toast.show_toast()
+            return
+        
+        # get product id
+        row_data = self.table.get_rows(selected=True)[0].values
+
+        # insert values into database
+        columns = "(numapto, produto, prod_id)"
+        data = f"('{self.numapto}', '{row_data[1]}', '{row_data[0]}')"
+        q = int(self.var_quantity.get())
+        values = data
+        if q > 0:
+            for _ in range(q - 1):
+                values += ', ' + data
+            
+            cursor = self.con.cursor()
+            print(f"INSERT INTO consumos {columns} VALUES {values}")
+            cursor.execute(f"INSERT INTO consumos {columns} VALUES {values}")
+            self.con.commit()
+        
+        # update quantity data in produtos
+        quantity = int(list(self.con.execute(f"SELECT quantidade FROM produtos WHERE rowid = {row_data[0]}"))[0][0])
+        self.con.execute(f"UPDATE produtos SET quantidade = {quantity - q} WHERE rowid = {row_data[0]}")
+
+        # display toast notification if success
+        toast = ToastNotification(title="Success", message="Data added to database.", bootstyle='success', icon='', duration=3000, position=(0,0,'nw'))
+        toast.show_toast()
+
+        # updates table if there is table connected
+        if isinstance(self.table, Integrated_Table_View):
+            self.table.update_table()
+        
+        for table in self.linked_tables:
+            table.update_table()
+
+    def product_is_avaliable(self):
+        """
+            Checks if product is avalible to be consumed
+        """
+        row_data = self.table.get_rows(selected=True)
+        if len(row_data) > 1:
+                return False
+            
+        row_data = row_data[0].values    
+        
+        q = int(row_data[4])
+        if int(self.var_quantity.get()) > q:
+            return False
+        
+        return True
 
     
     
