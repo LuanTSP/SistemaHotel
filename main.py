@@ -13,7 +13,7 @@ class App(ttk.Window):
         # initial setup
         super().__init__(themename='solar')
         self.title('Sistema Hotel')
-        self.geometry('2000x2000')
+        self.geometry('700x700')
 
         # Connect to databases
         self.con = self.make_connection()

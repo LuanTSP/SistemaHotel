@@ -1,6 +1,6 @@
 from MyWidgets import Integrated_Register_Form, Integrated_Table_View
-import pandas as pd
-from win32com import client
+import os
+import xlwings as xw
 import ttkbootstrap as ttk
 from ttkbootstrap.toast import ToastNotification
 import sqlite3
@@ -270,45 +270,44 @@ class Reservation_Form(Integrated_Register_Form):
             
             row_data = rows[0].values
 
-            # load workbook
-            excel = client.Dispatch("Excel.Application")
-            book = excel.Workbooks.Open('./Reports/ReservationModel.xlsx')
-            sheet = book.Worksheets[0]
-            
+            # load workbook make report
+            with xw.App(visible=False) as app:
+                wb = xw.Book(fullname=f'./ReportModels/ReservationModel.xlsx')
+                ws = wb.sheets('Model')
+                # cells
+                cells = [
+                    ws['C3'],
+                    ws['C7'],
+                    ws['C8'],
+                    ws['C9'],
+                    ws['C10'],
+                    ws['C11'],
+                    ws['C12'],
+                    ws['F7'],
+                    ws['F8'],
+                    ws['F9'],
+                    ws['F10'],
+                    ws['F11'],
+                    ws['I7'],
+                    ws['K7'],
+                    ws['I8'],
+                    ws['K8'],
+                    ws['I9'],
+                    ws['K9'],
+                    ws['I10'],
+                    ws['K10'],
+                    ws['I11'],
+                    ws['K11'],
+                ]
 
-            # cells
-            cells = [
-                sheet.Range('D4'),
-                sheet.Range('D7'),
-                sheet.Range('D8'),
-                sheet.Range('D9'),
-                sheet.Range('D10'),
-                sheet.Range('D11'),
-                sheet.Range('D12'),
-                sheet.Range('K7'),
-                sheet.Range('K8'),
-                sheet.Range('K9'),
-                sheet.Range('K10'),
-                sheet.Range('K11'),
-                sheet.Range('D14'),
-                sheet.Range('K14'),
-                sheet.Range('D15'),
-                sheet.Range('K15'),
-                sheet.Range('D16'),
-                sheet.Range('K16'),
-                sheet.Range('D17'),
-                sheet.Range('K17'),
-                sheet.Range('D18'),
-                sheet.Range('K18'),
-            ]
+                for c, v in zip(cells,row_data):
+                    c.value = v
+                ws['F3'].value = row_data[1]
 
-            for c, v in zip(cells,row_data):
-                c.Value = v
-
-            # save workbook
-            book
-
-            df = pd.read_excel(io='./Reports/ReservationModel.xlsx', sheet_name='Model')
+                # save workbook in folder
+                save_folder = 'ReservationReports'
+                os.makedirs(name=save_folder, exist_ok=True)
+                wb.to_pdf(path=f"./{save_folder}/{row_data[1]}-{row_data[0]}.pdf")
         
         btn = ttk.Button(master=master, text='Make Report', command=make_report)
         return btn
